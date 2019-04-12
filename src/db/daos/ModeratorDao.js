@@ -6,7 +6,7 @@ class ModeratorDao {
     constructor() {
 
         this.db_client = new Client({
-            connectionString: 'postgres://ymbogxpnnlomqc:8bec2555d7329bae017d9dc884f17e491c9bbbd5455cc36eef1bc11f31110bf0@ec2-54-228-243-238.eu-west-1.compute.amazonaws.com:5432/d7nu384eg44a02',//process.env.DATABASE_URL,
+            connectionString: process.env.DATABASE_URL,
             ssl: true,
         });
 
