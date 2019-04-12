@@ -1,0 +1,1 @@
+web: DEBUG=mop-backend:* npm start
