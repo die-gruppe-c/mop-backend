@@ -3,7 +3,7 @@ var router = express.Router();
 const passport = require('passport');
 const auth = require('../src/config/auth');
 var ModeratorDao = require('../src/db/daos/ModeratorDao');
-var User = require('../src/db/models/Moderator');
+var Moderator = require('../src/db/models/Moderator');
 const bcrypt = require('bcrypt-nodejs');
 
 
@@ -34,9 +34,7 @@ router.post('/register', auth.optional, function(req, res) {
         return;
     }
 
-    let user_repo = new ModeratorDao();
-
-    user_repo.getModByEMail(req.headers.email, function (mod) {
+    ModeratorDao.getModByEMail(req.headers.email, function (mod) {
         if (mod) {
             res.status(400);
             res.send( "Es ist bereits ein Konto mit dieser E-Mail-Adresse hinterlegt." );
@@ -48,7 +46,7 @@ router.post('/register', auth.optional, function(req, res) {
         bcrypt.hash(req.headers.password, salt, null, function (err, hash) {
             if (err) throw err;
 
-            user_repo.createModerator(new User(0, req.headers.email, hash), function (result) {
+            ModeratorDao.createModerator(new Moderator(0, req.headers.email, hash), function (result) {
                 if (result.rowCount === 1){
                     res.status(201);
                     res.send( "Benutzer wurde erfolgreich erstellt." );

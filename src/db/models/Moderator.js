@@ -3,34 +3,22 @@ const jwt = require('jsonwebtoken');
 class Moderator {
 
     constructor( id, email, password ){
-        this.id = id;
-        this.email = email;
-        this.password = password;
-    }
-
-    get_id(){
-        return this.id;
-    }
-
-    get_email(){
-        return this.email;
-    }
-
-    get_password(){
-        return this.password;
+        this._id = id;
+        this._email = email;
+        this._password = password;
     }
 
     generateJWT(){
         return jwt.sign({
-            email: this.email,
-            id: this.id,
+            email: this._email,
+            id: this._id,
         }, 'secret');
     }
 
     toAuthJSON() {
         return {
-            id: this.id,
-            email: this.email,
+            id: this._id,
+            email: this._email,
             token: this.generateJWT(),
         };
     };

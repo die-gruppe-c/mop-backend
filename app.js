@@ -1,5 +1,3 @@
-const UserRepository = require('./src/db/daos/ModeratorDao');
-
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -11,11 +9,11 @@ const passport = require('passport');
 const bodyParser = require('body-parser');
 
 var indexRouter = require('./routes/index');
-var userRouter = require('./routes/user');
+var moderatorRouter = require('./routes/moderator');
+var guestRouter = require('./routes/guest');
+var roomRouter = require('./routes/room');
 
 require('./src/config/passport');
-
-
 
 
 var app = express();
@@ -41,11 +39,11 @@ app.use(session({
   saveUninitialized: false
 }));
 
-
-
 //routes
 app.use('/', indexRouter);
-app.use('/user', userRouter);
+app.use('/moderator', moderatorRouter);
+app.use('/guest', guestRouter);
+app.use('/room', roomRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

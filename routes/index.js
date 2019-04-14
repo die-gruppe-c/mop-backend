@@ -7,8 +7,8 @@ var ModeratorDao = require('../src/db/daos/ModeratorDao');
 
 /* GET home page. */
 router.get('/', auth.required, function(req, res, next) {
-  new ModeratorDao().getModById(req.user.id, function (mod) {
-    res.send(mod.get_email());
+  ModeratorDao.getModById(req.moderator.js.id, function (mod) {
+    res.send(mod._email);
   });
 });
 

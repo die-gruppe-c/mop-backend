@@ -8,12 +8,12 @@ var ModeratorDao = require('../db/daos/ModeratorDao');
 passport.use(new LocalStrategy(
     { usernameField: 'email'},
     (email, password, done) => {
-        new ModeratorDao().getModByEMail(email, function (user) {
-            if (user){
-                if (!bcrypt.compareSync(password, user.get_password())) {
+        ModeratorDao.getModByEMail(email, function (moderator) {
+            if (moderator){
+                if (!bcrypt.compareSync(password, moderator._password)) {
                     return done(null, false, { message: 'Invalid credentials.\n' });
                 }
-                return done(null, user);
+                return done(null, moderator);
             } else {
                 return done(null, false, { message: 'Invalid credentials.\n' });
             }
@@ -22,12 +22,12 @@ passport.use(new LocalStrategy(
 ));
 
 // tell passport how to serialize the user
-passport.serializeUser((user, done) => {
-    done(null, user.get_id());
+passport.serializeUser((moderator, done) => {
+    done(null, moderator._id);
 });
 
 passport.deserializeUser((id, done) => {
-    new UserRepository().getModById(id, function (user) {
+    ModeratorDao.getModById(id, function (user) {
         done( null, user);
     });
 });
