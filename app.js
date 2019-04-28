@@ -4,17 +4,14 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-const session = require('express-session');
-const passport = require('passport');
 const bodyParser = require('body-parser');
 
 var indexRouter = require('./routes/index');
-var moderatorRouter = require('./routes/moderator');
-var guestRouter = require('./routes/guest');
 var roomRouter = require('./routes/room');
 
-require('./src/config/passport');
-
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 
 var app = express();
 
@@ -28,21 +25,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-//session handling
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(passport.initialize());
-
-app.use(session({
-  secret: 'mop_backend',
-  resave: false,
-  saveUninitialized: false
-}));
 
 //routes
 app.use('/', indexRouter);
-app.use('/moderator', moderatorRouter);
-app.use('/guest', guestRouter);
 app.use('/room', roomRouter);
 
 // catch 404 and forward to error handler

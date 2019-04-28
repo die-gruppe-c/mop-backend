@@ -1,17 +1,16 @@
 const { Client } = require('pg/lib');
 
-var client_instance = null;
 
 class DbClient {
 
-    static connect(){
+    static async getClient(){
 
-        let db_client = client_instance = new Client({
+        let db_client = new Client({
             connectionString: process.env.DATABASE_URL,
             ssl: true,
         });
 
-        db_client.connect();
+        await db_client.connect();
 
         return db_client;
 

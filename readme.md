@@ -16,53 +16,144 @@
 `https://mop-gruppec-backend.herokuapp.com/`
 
 ## Endpunkte
-
-Bei Endpunkten die mit `AUTH` markiert sind muss ein Token im Header mitgeschickt werden.
+Bei jeder Anfrage muss die UUID des Benutzers im Request-Header angegeben werden:
 ```
-Authorization: Token eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpb
+guest_uuid: ed6cb2a9-85ce-4020-bb28-df828b11f8f8
 ```
-Den Token erhält man beim Aufruf des Login-Endpunkts und sollte dann gespeichert werden.
 
+### /room/create `POST`
+Erstellt einen neuen Diskussionsraum. Maximale Raumlänge: 50 Zeichen.
 
-### /moderator/login `POST` `NOAUTH` 
-Benutzername und Passwort müssen im Body als JSON mitgegeben werden.
+Request-Body:
 ```
-{	
-  "email":"test6@mail.com", 
-  "password":"passwort"
+{
+  "name": "Raum1",
+  "attributes": [
+    {
+      "name": "Geschlecht",
+      "values": [
+        {
+          "name": "männlich",
+          "color": "#00ff23",
+          "weight": "40"
+        },
+        {
+          "name": "weiblich",
+          "color": "#00ff64",
+          "weight": "60"
+        }
+      ]
+    },
+    {
+      "name": "Alter",
+      "values": [
+        {
+          "name": "jung",
+          "color": "#ff35e5",
+          "weight": "70"
+        },
+        {
+          "name": "alt",
+          "color": "#ee3533",
+          "weight": "30"
+        }
+      ]
+    }
+  ]
 }
-```
-### /moderator/register `POST` `NOAUTH` 
-Benutzername und Passwort müssen im Header mitgegeben werden.
-```
-email: test6@mail.com
-password: passwort
 ```
 Antwort:
 ```
 {
-"user":{
-    "id": 8,
-    "email": "test3@mail.com",
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QzQG1haWwuY29tIiwiaWQiOjgsImlhdCI6MTU1NTA5MDQ2Nn0.qyIk8TPz8-0I85S5R7B4mEsijvI-6D50laCDyD9QrGA"
-    }
+    "id": 3717,
+    "room_name": "Testraum1",
 }
 ```
 
-### /guest/request `GET` `NOAUTH` 
-Erstellt einen Gast-Token und schickt ihn als JSON zurück. Gast-Token sollte beim ersten Start der App angefragt werden 
-und immer wieder verwendet werden.
+### /room/join `POST`
+Lässt einen Gast einem Raum beitreten. Im Header muss immer die UUID des Benutzers mitgegeben werden, auch
+wenn der Moderator einen Gast hinzu fügt. Die UUID im Body muss nur angegeben werden wenn der Moderator
+den Teilnehmer hinzufügt. Die UUID im Body sollte im Frontend dafür neu generiert werden.
 
-### /room/create `POST` `AUTH` 
-Erstellt einen neuen Diskussionsraum. Name des Raums muss im Header angegeben werden. Maximale Raumlänge: 50 Zeichen.
+Request-Body:
 ```
-room_name: Diskussionsraum1
+{
+ "roomId": "4825",
+ "name": "Name1",
+ "uuid": "sdf-flsl23-3l432-3efl",
+ "attributes": [
+  {
+   "name": "Geschlecht",
+   "values": [
+    {
+     "name": "männlich"
+    }
+   ]
+  },
+  {
+   "name": "Alter",
+   "values": [
+    {
+     "name": "jung"
+    }
+   ]
+  }
+ ]
+}
 ```
 
-### /room/join `POST` `NOAUTH` 
-Lässt einen Gast einem Raum beitreten. Gastname kann für jeden Raum neu vergeben werden.
+### /room `GET`
+Ohne Parameter: Gibt alle Raume zurück die der Nutzer erstellt hat oder an 
+welchen er teilgenommen hat. Die Benutzer-UUID muss im Header angegeben werden.
+Wenn der Nutzer den Raum erstellt hat ist die UUID im Raum mit angegeben. Wenn er nur 
+Teilgenommen hat ist das Feld leer.
+
+Mit Parameter `?id=1234`: Ein Raum wird zurückgegeben.
+
 ```
-guest_token: 4b4c0aba-75b7-4747-ac6e-f8f7fc72554c
-room_id: 2
-guest_name: Gastname1
+{
+  "id": 1671,
+  "name": "Raum1",
+  "owner": "",
+  "created_on": "2019-04-23T18:02:36.377Z",
+  "archived": false,
+  "running": false,
+  "attributes": [
+    {
+      "name": "Geschlecht",
+      "values": [
+        {
+          "name": "männlich",
+          "color": "#00ff23",
+          "weight": 40
+        },
+        {
+          "name": "weiblich",
+          "color": "#00ff64",
+          "weight": 60
+        }
+      ]
+    },
+    {
+      "name": "Alter",
+      "values": [
+        {
+          "name": "alt",
+          "color": "#ee3533",
+          "weight": 30
+        },
+        {
+          "name": "jung",
+          "color": "#ff35e5",
+          "weight": 70
+        }
+      ]
+    }
+  ]
+}
 ```
+
+### /room/rejoin `GET`
+Wenn der Benutzer in einem Raum ist der noch nicht archiviert ist
+wird diesre zurückgegeben. Falls nicht kommt nichts zurück. Wenn das
+UUID-Feld (Owner) im Raum gefüllt ist, ist der Benutzer der Ersteller des Raums.
