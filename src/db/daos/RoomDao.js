@@ -1,7 +1,8 @@
 var DbClient = require('../DbClient');
-var Room = require('../models/Room');
-var Attribute = require('../models/Attribute');
-var AttributeValue = require('../models/AttributeValue');
+var Room = require('../entities/Room');
+var Guest = require('../entities/Guest');
+var Attribute = require('../entities/Attribute');
+var AttributeValue = require('../entities/AttributeValue');
 
 
 class RoomDao{
@@ -137,7 +138,7 @@ class RoomDao{
             return rooms;
         } catch (e) {
             console.log(e);
-            return rooms;
+            return false;
         } finally {
             client.end();
         }
@@ -168,6 +169,101 @@ class RoomDao{
         }
     }
 
+    static async getParticipant(uuid, roomId){
+        let client = await DbClient.getClient();
+        try {
+
+            let { rows } = await client.query('SELECT * FROM room_participant WHERE guest_id = $1 AND room_id = $2',[uuid, roomId]);
+            let participantRows = rows;
+
+            if (participantRows.length === 0) return false;
+
+            let guest = new Guest(participantRows[0].room_id, participantRows[0].guest_id, participantRows[0].guest_name, participantRows[0].created_by_owner);
+
+            rows = await client.query('SELECT * FROM room_participant_attribute WHERE room_id = $1 AND guest_id = $2', [roomId, uuid]);
+            let attributeRows = rows.rows;
+
+            for (let i in attributeRows){
+                let attribute;
+
+                for (let l in guest._attributes) {
+                    if (guest._attributes[l]._name === attributeRows[i].attribute) attribute = guest._attributes[l];
+                }
+
+                if (!attribute){
+                    attribute = new Attribute(attributeRows[i].attribute);
+                    guest._attributes.push(attribute);
+                }
+
+                let {rows} = await client.query('SELECT * FROM room_attribute_value WHERE name = $1 AND attribute_name = $2 AND room_id = $3',
+                    [attributeRows[i].attribute_value,attribute._name, guest._roomId]);
+                let attributeValueRows = rows;
+
+                if (attributeValueRows.length === 0) continue;
+
+                attribute._values.push(new AttributeValue(attributeRows[i].attribute_value, attributeValueRows[0].color, attributeValueRows[0].weight));
+            }
+
+            return guest;
+
+        } catch (e) {
+            console.log(e);
+            return false;
+        } finally {
+            client.end();
+        }
+    }
+
+    static async getAllParticipants(roomId){
+        let client = await DbClient.getClient();
+        try {
+
+            let guests = [];
+
+            let { rows } = await client.query('SELECT * FROM room_participant WHERE room_id = $1',[roomId]);
+            let participantRows = rows;
+
+            for (let a in participantRows) {
+
+                let guest = new Guest(participantRows[a].room_id, participantRows[a].guest_id, participantRows[a].guest_name, participantRows[a].created_by_owner);
+
+                let { rows } = await client.query('SELECT * FROM room_participant_attribute WHERE room_id = $1 AND guest_id = $2', [roomId, guest._uuid]);
+                let attributeRows = rows;
+
+                for (let i in attributeRows) {
+                    let attribute;
+
+                    for (let l in guest._attributes) {
+                        if (guest._attributes[l]._name === attributeRows[i].attribute) attribute = guest._attributes[l];
+                    }
+
+                    if (!attribute) {
+                        attribute = new Attribute(attributeRows[i].attribute);
+                        guest._attributes.push(attribute);
+                    }
+
+                    let {rows} = await client.query('SELECT * FROM room_attribute_value WHERE name = $1 AND attribute_name = $2 AND room_id = $3',
+                        [attributeRows[i].attribute_value, attribute._name, guest._roomId]);
+                    let attributeValueRows = rows;
+
+                    if (attributeValueRows.length === 0) continue;
+
+                    attribute._values.push(new AttributeValue(attributeRows[i].attribute_value, attributeValueRows[0].color, attributeValueRows[0].weight));
+                }
+
+                guests.push(guest);
+            }
+
+            return guests;
+
+        } catch (e) {
+            console.log(e);
+            return false;
+        } finally {
+            client.end();
+        }
+    }
+
     static async isInActiveRoom(uuid){
         let client = await DbClient.getClient();
         try {
@@ -180,8 +276,8 @@ class RoomDao{
 
             const roomsAsOwner = await this.getRoomsOfOwner(uuid);
 
-            for (let i in roomsAsOwner){
-                if (!roomsAsOwner[i]._archived) return roomsAsOwner[i];
+            for (let a in roomsAsOwner){
+                if (!roomsAsOwner[a]._archived) return roomsAsOwner[a];
             }
 
             return false;
@@ -193,6 +289,17 @@ class RoomDao{
         }
     }
 
+    static async updateRoomRunning(roomId, running) {
+        let client = await DbClient.getClient();
+        try {
+            await client.query('UPDATE room SET running = $1 WHERE id = $2', [running, roomId]);
+        } catch (e) {
+            console.log(e);
+            return false;
+        } finally {
+            client.end();
+        }
+    }
 }
 
 module.exports = RoomDao;

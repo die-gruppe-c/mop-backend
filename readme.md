@@ -6,11 +6,7 @@
 3. Run `DEBUG=mop-backend:* npm start`
 
 ## Deploy on Heroku
-1. Install Heroku Cli
-2. Login `heroku login`
-3. Configure Heroku remote `heroku git:remote -a mop-gruppec-backend`
-4. Push to Heroku remote `git push heroku master`
-5. Open in Browser `heroku open`
+Push to master. Gets deployed automatically.
 
 ## URL
 `https://mop-gruppec-backend.herokuapp.com/`
@@ -157,3 +153,154 @@ Mit Parameter `?id=1234`: Ein Raum wird zurückgegeben.
 Wenn der Benutzer in einem Raum ist der noch nicht archiviert ist
 wird diesre zurückgegeben. Falls nicht kommt nichts zurück. Wenn das
 UUID-Feld (Owner) im Raum gefüllt ist, ist der Benutzer der Ersteller des Raums.
+
+## Websocket Commands
+
+Id ist in diesem Kontext die Frontend-Id die nach start des Raums in der "allUsers" 
+Nachricht enthalten ist.
+
+### Anfragen
+
+#### register: `UUID`
+Ordnet die Websocket-Verbindung einem Benutzer zu. Muss direkt nach dem
+Verbinden aufgerufen werden.
+
+#### start
+Nur Moderator wenn Raum noch nicht läuft.
+
+Started den Raum. Schickt danach allen die endgültige Nutzerliste samt
+Frontend-Id.
+
+#### updateUserList
+Nur Moderator.
+ 
+Aktualisiert die Daten der Gäste. Antwort: allUsers
+
+#### addUserToSpeechList: `ID`
+Nur Moderator und wenn Raum bereits läuft.
+
+Fügt einen Client der sich gemeldet hat der Redeliste hinzu.
+
+#### changeSortOrder: `ID`,`INDEX`
+Nur Moderator und wenn Raum bereits läuft.
+
+Ändert die Reihenfolge auf der Redeliste.
+
+#### wantToSpeak: `SPEECH TYPE`
+Nur Client wenn Raum bereits läuft.
+
+Fügt der Melde-Liste einen Redebeitrag des Nutzers hinzu. Auf der
+Melde-Liste kann ein Nutzer nur ein mal stehen. Alle anderen Meldungen
+werden ignoriert.
+
+#### wantNotToSpeak
+Nur Client wenn Raum bereits läuft.
+
+Löscht die Meldung des Nutzers. 
+
+### Antworten
+
+Antworten werden in einem Wrapper verschickt:
+
+```
+{
+    "command": "stared",
+    "data": 
+}
+```
+
+#### started
+Benachrichtigt alle dass der Raum vom Moderator gestarted wurde.
+
+#### speechTypes
+Redebeitrag-Typen. Bei senden an den Server immer die Id und nicht den
+Namen verwenden!
+
+#### allUsers
+Daten der Gäste. Frontend_id Attribut nur vorhanden nachdem der Raum
+gestartet wurde. UUID Feld nur gefüllt, wenn dieser Gast zum App-Benutzer
+gehört.
+
+```
+{
+  "command": "allUsers",
+  "data": [
+    {
+      "roomId": 3952,
+      "uuid": "",
+      "name": "Name1",
+      "createdByOwner": false,
+      "online": false,
+      "attributes": [
+        {
+          "name": "Alter",
+          "values": [
+            {
+              "name": "jung",
+              "color": "#ff35e5",
+              "weight": 70
+            }
+          ]
+        },
+        {
+          "name": "Geschlecht",
+          "values": [
+            {
+              "name": "männlich",
+              "color": "#00ff23",
+              "weight": 30
+            }
+          ]
+        }
+      ],
+      "frontend_id": "0"
+    }
+  ]
+}
+```
+
+#### speechList
+Redeliste
+```
+{
+  "command": "speechList",
+  "data": [
+    {
+      "id": "1",
+      "speechType": 2
+    },
+    {
+      "id": "0",
+      "speechType": 2
+    }
+  ]
+}
+```
+
+#### wantToSpeakList
+Meldeliste
+```
+{
+  "command": "wantToSpeakList",
+  "data": [
+    {
+      "id": "1",
+      "speechType": 2
+    },
+    {
+      "id": "0",
+      "speechType": 2
+    }
+  ]
+}
+```
+
+#### sortedList
+Sortierte Liste
+```
+{
+  "command": "sortedList",
+  "data": [2,3,1]
+}
+```
+

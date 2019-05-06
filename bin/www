@@ -8,6 +8,9 @@ var app = require('../app');
 var debug = require('debug')('mop-backend:server');
 var http = require('http');
 
+var DiscussionManager = require('../src/discussion/DiscussionManager');
+
+
 /**
  * Get port from environment and store in Express.
  */
@@ -20,6 +23,18 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
+
+
+/**
+ * Setup Websocket Routes
+ */
+var WebSocket = require('ws');
+
+const wss = new WebSocket.Server({ server });
+
+new DiscussionManager(wss);
+
+
 
 /**
  * Listen on provided port, on all network interfaces.

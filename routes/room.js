@@ -1,8 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var RoomDao = require('../src/db/daos/RoomDao');
-var Room = require('../src/db/models/Room');
-var Guest = require('../src/db/models/Guest');
+var Room = require('../src/db/entities/Room');
+var Guest = require('../src/db/entities/Guest');
 
 
 router.post('/create', async function(req, res, next) {
