@@ -1,4 +1,4 @@
-class SpeechContribution {
+class SpeechRequest {
 
     constructor(id, speechtype){
         this.id = id;
@@ -23,4 +23,4 @@ class SpeechContribution {
 
 }
 
-module.exports = SpeechContribution;
+module.exports = SpeechRequest;

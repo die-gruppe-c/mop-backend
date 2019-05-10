@@ -1,5 +1,5 @@
-const SpeechContribution = require('../models/SpeechContribution');
-const Util = require('../Util');
+const SpeechRequest = require('../models/SpeechRequest');
+const Util = require('../util/Util');
 
 const MESSAGE_KEY = 'wantToSpeakList';
 
@@ -17,7 +17,7 @@ class WantToSpeakList {
         });
 
         if (filteredWantToSpeakList.length === 0){
-            this._list.push(new SpeechContribution(id,type));
+            this._list.push(new SpeechRequest(id,type));
         }
     }
 
@@ -47,7 +47,7 @@ class WantToSpeakList {
     }
 
     toMessage(){
-        return Util.wrapResponse(MESSAGE_KEY, SpeechContribution.listToJson(this._list));
+        return Util.wrapResponse(MESSAGE_KEY, SpeechRequest.listToJson(this._list));
     }
 }
 

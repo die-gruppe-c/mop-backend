@@ -1,5 +1,5 @@
-const SpeechContribution = require('../models/SpeechContribution');
-const Util = require('../Util');
+const SpeechRequest = require('../models/SpeechRequest');
+const Util = require('../util/Util');
 
 const MESSAGE_KEY = 'speechList';
 
@@ -11,7 +11,8 @@ class SpeechList {
     }
 
     add(id, type){
-        this._list.push(new SpeechContribution(id, type));
+        if (isNaN(id)) return;
+        this._list.push(new SpeechRequest(id, type));
     }
 
     remove(id){
@@ -30,6 +31,14 @@ class SpeechList {
         return success;
     }
 
+    removeFirst(){
+        return this._list.shift();
+    }
+
+    getLength(){
+        return this._list.length;
+    }
+
     reorder(id, idx) {
         if (isNaN(id) || isNaN(idx)) return;
 
@@ -41,7 +50,7 @@ class SpeechList {
     }
 
     toMessage(){
-        return Util.wrapResponse(MESSAGE_KEY, SpeechContribution.listToJson(this._list));
+        return Util.wrapResponse(MESSAGE_KEY, SpeechRequest.listToJson(this._list));
     }
 }
 

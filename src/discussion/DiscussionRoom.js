@@ -1,9 +1,11 @@
 const RoomDao = require('../db/daos/RoomDao');
-const Util = require('./Util');
+const Util = require('./util/Util');
+const Stopwatch = require('./util/Stopwatch');
 const SpeechTypes = require('./SpeechType');
 const WantToSpeakList = require('./lists/WantToSpeakList');
 const SpeechList = require('./lists/SpeechList');
 const SortedList = require('./lists/SortedList');
+const SpeechContributionHandler = require('./SpeechContributionHandler');
 
 
 //requests
@@ -14,7 +16,12 @@ const wantNotToSpeakRegex = /^wantNotToSpeak/;
 const startRegex = /^start/;
 const updateUserListRegex = /^updateUserList/;
 const addUserToSpeechListRegex = /^addUserToSpeechList:/;
+const removeUserFromSpeechListRegex = /^removeUserFromSpeechList:/;
 const changeSortOrderRegex = /^changeSortOrder:/;
+//both
+const startSpeechContribution = /^startSpeech/;
+const pauseSpeechContribution = /^pauseSpeech/;
+const stopSpeechContribution = /^stopSpeech/;
 
 //answers
 const STARTED = 'started';
@@ -28,9 +35,13 @@ class DiscussionRoom{
         this._clients = [];
         this._allParticipants = [];
 
-        this._wantToSpeakList = new WantToSpeakList(); //SpeechContribution
-        this._sortedUserList = new SortedList(); //frontendId
-        this._speechList = new SpeechList(); //SpeechContribution
+        this._wantToSpeakList = new WantToSpeakList();
+        this._sortedUserList = new SortedList();
+        this._speechList = new SpeechList();
+
+        this._speechHandler = new SpeechContributionHandler();
+
+        this._stopWatch = new Stopwatch();
 
         this._checkConnectionsAlive();
     }
@@ -95,6 +106,10 @@ class DiscussionRoom{
                 case addUserToSpeechListRegex.test(request):
                     this._addUserWhoWantsToSpeechList(request);
                     break;
+                case removeUserFromSpeechListRegex.test(request):
+                    this._speechList.remove(Util.parseMessage(removeUserFromSpeechListRegex,request));
+                    this._broadcastAll(this._speechList.toMessage());
+                    break;
                 case changeSortOrderRegex.test(request):
                     let messages = Util.parseMessage(changeSortOrderRegex, request).split(',');
                     if (messages.length === 2){
@@ -102,6 +117,8 @@ class DiscussionRoom{
                         this._broadcastAll(this._speechList.toMessage());
                     }
                     break;
+                default:
+                    this._handleCommonRequests(moderator, request);
             }
         }else{
             switch (true) {
@@ -128,11 +145,38 @@ class DiscussionRoom{
                     this._wantToSpeakList.remove(id);
                     this._moderator.send(this._wantToSpeakList.toMessage());
                     break;
+                default:
+                    this._handleCommonRequests(participant, request);
             }
         }
     }
 
-    //start user functions
+    _handleCommonRequests(client, request){
+        let id = this._getFrontendIdFromClient(client);
+
+        if (isNaN(id)) return;
+
+        if (id !== this._moderator._uuid || id !== this._speechHandler.getSpeaker()) return;
+
+        switch (true) {
+            case startSpeechContribution.test(request):
+                this._speechHandler.start();
+                break;
+            case pauseSpeechContribution.test(request):
+                this._speechHandler.pause();
+                break;
+            case stopSpeechContribution.test(request):
+                //todo save time to statistic
+                this._speechHandler.stop();
+                let nextSpeaker = this._speechList.removeFirst();
+                if (nextSpeaker) this._speechHandler.setSpeaker(nextSpeaker.id, nextSpeaker.speechType);
+                this._broadcastAll(this._speechList.toMessage());
+                break;
+        }
+        this._broadcastAll(this._speechHandler.toMessage());
+    }
+
+    //start: user functions
 
     async _startRoom(){
 
@@ -146,6 +190,8 @@ class DiscussionRoom{
 
         if (this._room._running) {
             this._broadcastAll(Util.wrapResponse(STARTED));
+
+            this._stopWatch.start();
 
             this._allParticipants = await RoomDao.getAllParticipants(this.getRoomId());
 
@@ -166,12 +212,21 @@ class DiscussionRoom{
         let reqId = Util.parseMessage(addUserToSpeechListRegex,request);
         let wantToSpeakItem = this._wantToSpeakList.contains(reqId);
         if (!wantToSpeakItem) return;
-        this._speechList.add(wantToSpeakItem.id,wantToSpeakItem.speechType);
+
         this._wantToSpeakList.remove(reqId);
-        this._broadcastAll(this._speechList.toMessage());
+        this._broadcastAll(this._wantToSpeakList.toMessage());
+
+        if (!this._speechHandler.getSpeaker() && this._speechList.getLength() === 0) {
+            this._speechHandler.setSpeaker(wantToSpeakItem.id, wantToSpeakItem.speechType);
+            this._broadcastAll(this._speechHandler.toMessage());
+        }else{
+            this._speechList.add(wantToSpeakItem.id,wantToSpeakItem.speechType);
+            this._broadcastAll(this._speechList.toMessage());
+        }
+
     }
 
-    //end user functions
+    //end: user functions
 
     _getFrontendIdFromClient(client){
         let filteredParticipants = this._allParticipants.filter(function (item) {

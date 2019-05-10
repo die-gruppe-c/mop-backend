@@ -198,6 +198,16 @@ Nur Client wenn Raum bereits läuft.
 
 Löscht die Meldung des Nutzers. 
 
+#### startSpeech
+Startet den Redebeitrag des aktuellen Redners
+
+#### pauseSpeech
+Pausiert den Redebeitrag des aktuellen Redners
+
+#### stopSpeech
+Stoppt den Redebeitrag des aktuellen Redners und macht den
+ersten auf der Redeliste zum aktuellen Redner.
+
 ### Antworten
 
 Antworten werden in einem Wrapper verschickt:
@@ -209,12 +219,22 @@ Antworten werden in einem Wrapper verschickt:
 }
 ```
 
+
 #### started
 Benachrichtigt alle dass der Raum vom Moderator gestarted wurde.
 
 #### speechTypes
 Redebeitrag-Typen. Bei senden an den Server immer die Id und nicht den
 Namen verwenden!
+```
+{
+  "command": "speechTypes",
+  "data": {
+    "SPEECH_CONTRIBUTION": 1,
+    "QUESTION": 2
+  }
+}
+```
 
 #### allUsers
 Daten der Gäste. Frontend_id Attribut nur vorhanden nachdem der Raum
@@ -304,3 +324,16 @@ Sortierte Liste
 }
 ```
 
+#### currentlySpeaking
+Aktueller Redner
+```
+{
+  "command": "currentlySpeaking",
+  "data": {
+              "speaker": 2,
+              "speechType": 1,
+              "running": true,
+              "duration": 34342
+          }
+}
+```

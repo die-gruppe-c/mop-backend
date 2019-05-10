@@ -1,4 +1,4 @@
-var Util = require('./Util');
+var Util = require('./util/Util');
 var DiscussionRoom = require('./DiscussionRoom');
 var RoomDao = require('../db/daos/RoomDao');
 
