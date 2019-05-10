@@ -12,6 +12,11 @@ Push to master. Gets deployed automatically.
 `https://mop-gruppec-backend.herokuapp.com/`
 
 ## Endpunkte
+Es gibt eine Postman Collection im Ordner `postman-collection`. 
+Diese Collection ist nich immer aktuell.
+Zum benutzten muss nur die `MOP.postman_collection.json` Datei in Postman importiert werden. 
+In dieser Collection werden Umgebungsvariablen benutzt welche in `MOP.postman_environment.json` gespeichert sind und ebenfalls importiert werden können.   
+
 Bei jeder Anfrage muss die UUID des Benutzers im Request-Header angegeben werden:
 ```
 guest_uuid: ed6cb2a9-85ce-4020-bb28-df828b11f8f8

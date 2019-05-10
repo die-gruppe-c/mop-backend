@@ -1,0 +1,239 @@
+{
+	"info": {
+		"_postman_id": "b8a27fa9-f019-44f1-9fa2-24e3059ee431",
+		"name": "MOP",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get all rooms",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "guest_uuid",
+						"value": "{{uuid}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}/room",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"room"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get one room",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "guest_uuid",
+						"value": "{{uuid}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}/room?id={{room_id}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"room"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "{{room_id}}",
+							"description": "room id"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create room",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "guest_uuid",
+						"value": "{{uuid}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Martins2\",\n    \"attributes\": [\n        {\n            \"name\": \"Alter\",\n            \"values\": [\n                {\n                    \"name\": \"alt\",\n                    \"color\": \"#000000\",\n                    \"weight\": \"33\"\n                },\n                {\n                    \"name\": \"jung\",\n                    \"color\": \"#000000\",\n                    \"weight\": \"33\"\n                },\n                {\n                    \"name\": \"was anderes\",\n                    \"color\": \"#000000\",\n                    \"weight\": \"33\"\n                }\n            ]\n        }\n    ]\n}"
+				},
+				"url": {
+					"raw": "{{url}}/room/create",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"room",
+						"create"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Create room",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "guest_uuid",
+								"value": "{{uuid}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Raum Postman\",\n  \"attributes\": [\n    {\n      \"name\": \"Geschlecht\",\n      \"values\": [\n        {\n          \"name\": \"männlich\",\n          \"color\": \"#00ff23\",\n          \"weight\": \"40\"\n        },\n        {\n          \"name\": \"weiblich\",\n          \"color\": \"#00ff64\",\n          \"weight\": \"60\"\n        }\n      ]\n    },\n    {\n      \"name\": \"Alter\",\n      \"values\": [\n        {\n          \"name\": \"jung\",\n          \"color\": \"#ff35e5\",\n          \"weight\": \"70\"\n        },\n        {\n          \"name\": \"alt\",\n          \"color\": \"#ee3533\",\n          \"weight\": \"30\"\n        }\n      ]\n    }\n  ]\n}\n"
+						},
+						"url": {
+							"raw": "{{url}}/room/create",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"room",
+								"create"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Server",
+							"value": "Cowboy"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "38"
+						},
+						{
+							"key": "Etag",
+							"value": "W/\"26-c/PV1UB/B+jzI0pTXlsXLrJa4xA\""
+						},
+						{
+							"key": "Date",
+							"value": "Fri, 10 May 2019 14:07:27 GMT"
+						},
+						{
+							"key": "Via",
+							"value": "1.1 vegur"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": 1928,\n    \"room_name\": \"Raum Postman\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Join room",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "guest_uuid",
+						"value": "{{uuid}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n \"roomId\": \"{{room_id}}\",\n \"name\": \"Post man 3\",\n \"attributes\": [\n  {\n   \"name\": \"alter\",\n   \"values\": [\n    {\n     \"name\": \"alt\"\n    }\n   ]\n  }\n ]\n}"
+				},
+				"url": {
+					"raw": "{{url}}/room/join",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"room",
+						"join"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Rejoin",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "guest_uuid",
+						"value": "{{uuid}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}/room/rejoin",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"room",
+						"rejoin"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
