@@ -234,6 +234,8 @@ class DiscussionRoom{
     //end: user functions
 
     _getFrontendIdFromClient(client){
+        if (!this._room._running) return false;
+
         let filteredParticipants = this._allParticipants.filter(function (item) {
            return client.guest_data._uuid === item._uuid;
         });
