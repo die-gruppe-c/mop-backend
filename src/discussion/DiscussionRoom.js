@@ -28,6 +28,7 @@ const stopSpeechContribution = /^stopSpeech/;
 const STARTED = 'started';
 const ALL_USERS = 'allUsers';
 const SPEECH_TYPES = 'speechTypes';
+const ROOM = 'room';
 
 class DiscussionRoom{
 
@@ -68,8 +69,10 @@ class DiscussionRoom{
             this._moderator.send(this._sortedUserList.toMessage());
         })();
 
+
         this._monitorConnection(moderator);
         this._moderator.send(DiscussionRoom._speechTypesToMessage());
+        this._moderator.send(Util.wrapResponse(ROOM), this._room.toJson(this._room._owner));
     }
 
     addParticipant(participant){
@@ -93,7 +96,8 @@ class DiscussionRoom{
         });
 
         this._monitorConnection(participant);
-        participant.send(this._speechTypesToMessage());
+        participant.send(DiscussionRoom._speechTypesToMessage());
+        participant.send(Util.wrapResponse(ROOM), this._room.toJson(participant.guest_data._uuid));
 
         (async () => {
             await this._broadcastUserData();
