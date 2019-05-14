@@ -72,7 +72,7 @@ class DiscussionRoom{
 
         this._monitorConnection(moderator);
         this._moderator.send(DiscussionRoom._speechTypesToMessage());
-        this._moderator.send(Util.wrapResponse(ROOM), this._room.toJson(this._room._owner));
+        this._moderator.send(Util.wrapResponse(ROOM, this._room.toJson(this._room._owner)));
     }
 
     addParticipant(participant){
@@ -97,7 +97,7 @@ class DiscussionRoom{
 
         this._monitorConnection(participant);
         participant.send(DiscussionRoom._speechTypesToMessage());
-        participant.send(Util.wrapResponse(ROOM), this._room.toJson(participant.guest_data._uuid));
+        participant.send(Util.wrapResponse(ROOM, this._room.toJson(participant.guest_data._uuid)));
 
         (async () => {
             await this._broadcastUserData();
