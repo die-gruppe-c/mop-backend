@@ -60,6 +60,7 @@ class DiscussionManager{
             Util.debugSend(ws,`als Moderator zu Raum ${room._id} hinzugefüt`);
         }else{
             ws.guest_data = await RoomDao.getParticipant(uuid, room._id);
+            if (!ws.guest_data) return;
             discussionRoom.addParticipant(ws);
             Util.debugSend(ws,`als Teilnehmer zu Raum ${room._id} hinzugefüt`);
         }

@@ -154,11 +154,12 @@ class DiscussionRoom{
     }
 
     _handleCommonRequests(client, request){
-        let id = this._getFrontendIdFromClient(client);
 
-        if (isNaN(id)) return;
+        if (client !== this._moderator) {
+            let id = this._getFrontendIdFromClient(client);
 
-        if (id !== this._moderator._uuid || id !== this._speechHandler.getSpeaker()) return;
+            if (isNaN(id) || id !== this._speechHandler.getSpeaker()) return;
+        }
 
         switch (true) {
             case startSpeechContribution.test(request):
@@ -234,7 +235,7 @@ class DiscussionRoom{
     //end: user functions
 
     _getFrontendIdFromClient(client){
-        if (!this._room._running) return false;
+        if (!this._room._running || client === this._moderator) return false;
 
         let filteredParticipants = this._allParticipants.filter(function (item) {
            return client.guest_data._uuid === item._uuid;
