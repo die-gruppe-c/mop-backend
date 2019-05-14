@@ -40,8 +40,16 @@ class SpeechContributionHandler {
         return this._currentlySpeaking;
     }
 
+    getSpeechType(){
+        return this._speechType;
+    }
+
     isSpeaking(){
         return this._stopwatch.isRunning();
+    }
+
+    getDuration(){
+        this._stopwatch.getDuration();
     }
 
     toMessage(){

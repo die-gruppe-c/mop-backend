@@ -6,6 +6,7 @@ const WantToSpeakList = require('./lists/WantToSpeakList');
 const SpeechList = require('./lists/SpeechList');
 const SortedList = require('./lists/SortedList');
 const SpeechContributionHandler = require('./SpeechContributionHandler');
+const StatisticHandler = require('./StatisticHandler');
 
 
 //requests
@@ -40,6 +41,7 @@ class DiscussionRoom{
         this._speechList = new SpeechList();
 
         this._speechHandler = new SpeechContributionHandler();
+        this._statisticHandler = new StatisticHandler();
 
         this._stopWatch = new Stopwatch();
 
@@ -67,7 +69,7 @@ class DiscussionRoom{
         })();
 
         this._monitorConnection(moderator);
-        this._moderator.send(this._speechTypesToMessage());
+        this._moderator.send(DiscussionRoom._speechTypesToMessage());
     }
 
     addParticipant(participant){
@@ -166,7 +168,10 @@ class DiscussionRoom{
                 this._speechHandler.pause();
                 break;
             case stopSpeechContribution.test(request):
-                //todo save time to statistic
+                this._speechHandler.pause();
+                let guest = this._getParticipantFromFrontendId(this._speechHandler.getSpeaker());
+                if (!guest) return;
+                this._statisticHandler.addRecord(guest,this._speechHandler.getSpeechType(),this._speechHandler.getDuration());
                 this._speechHandler.stop();
                 let nextSpeaker = this._speechList.removeFirst();
                 if (nextSpeaker) this._speechHandler.setSpeaker(nextSpeaker.id, nextSpeaker.speechType);
@@ -236,6 +241,16 @@ class DiscussionRoom{
         if (filteredParticipants.length === 0) return false;
 
         return filteredParticipants[0]._frontendId;
+    }
+
+    _getParticipantFromFrontendId(id){
+        let filteredParticipants = this._allParticipants.filter(function (item) {
+            return id === item._frontendId;
+        });
+
+        if (filteredParticipants.length === 0) return false;
+
+        return filteredParticipants[0];
     }
 
     static _speechTypesToMessage(){
