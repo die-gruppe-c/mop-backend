@@ -297,11 +297,12 @@ class DiscussionRoom{
 
         //each client seperately to show which entry belongs to the client
         for (let i in this._clients) {
+            if (!this._clients.hasOwnProperty(i)) continue;
             json = [];
 
-            for (let i in participants){
-                if (!participants.hasOwnProperty(i)) continue;
-                let guest = participants[i];
+            for (let a in participants){
+                if (!participants.hasOwnProperty(a)) continue;
+                let guest = participants[a];
                 json.push(guest.toJson(this._clients[i].guest_data._uuid))
             }
             try{
