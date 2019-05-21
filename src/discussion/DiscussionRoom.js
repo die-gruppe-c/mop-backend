@@ -2,6 +2,7 @@ const RoomDao = require('../db/daos/RoomDao');
 const Util = require('./util/Util');
 const Stopwatch = require('./util/Stopwatch');
 const SpeechTypes = require('./SpeechType');
+const SpeechRequest = require('./models/SpeechRequest');
 const WantToSpeakList = require('./lists/WantToSpeakList');
 const SpeechList = require('./lists/SpeechList');
 const SortedList = require('./lists/SortedList');
@@ -220,10 +221,16 @@ class DiscussionRoom{
     async _addUserWhoWantsToSpeechList(request){
         //remove from want to speak list and add to speech list
         let reqId = Util.parseMessage(addUserToSpeechListRegex,request);
-        let wantToSpeakItem = this._wantToSpeakList.contains(reqId);
-        if (!wantToSpeakItem) return;
 
-        this._wantToSpeakList.remove(reqId);
+
+        let wantToSpeakItem = this._wantToSpeakList.contains(reqId);
+        if (wantToSpeakItem){
+            this._wantToSpeakList.remove(reqId);
+        }else{
+            if (isNaN(reqId)) return;
+            wantToSpeakItem = new SpeechRequest(reqId,SpeechTypes.SPEECH_CONTRIBUTION);
+        }
+
         this._broadcastAll(this._wantToSpeakList.toMessage());
 
         if (!this._speechHandler.getSpeaker() && this._speechList.getLength() === 0) {
