@@ -344,7 +344,7 @@ class DiscussionRoom{
                 try{
                     conn.ping();
                 }catch (e) {
-                    console.log(e);
+                    //connection is not alive anymore
                 }
             }
 

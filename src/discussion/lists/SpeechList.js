@@ -21,7 +21,7 @@ class SpeechList {
         if (isNaN(id)) return success;
 
         for(let i = 0; i < this._list.length; i++) {
-            if (this._list[i] === id) {
+            if (this._list[i].id=== id) {
                 this._list.splice(i, 1);
                 i--;
                 success = true;
