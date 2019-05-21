@@ -237,6 +237,8 @@ class DiscussionRoom{
             this._speechHandler.setSpeaker(wantToSpeakItem.id, wantToSpeakItem.speechType);
             this._broadcastAll(this._speechHandler.toMessage());
         }else{
+            Util.debugSend(this._moderator,this._speechList.toMessage());
+            Util.debugSend(this._moderator,this._speechList._list);
             this._speechList.add(wantToSpeakItem.id,wantToSpeakItem.speechType);
             this._broadcastAll(this._speechList.toMessage());
         }
