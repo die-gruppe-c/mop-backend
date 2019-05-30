@@ -103,6 +103,10 @@ Request-Body:
 }
 ```
 
+### /room/leave `POST`
+Lässt einen Gast einen Raum verlassen dem er zuvor beigetreten ist. Der
+Raum darf jedoch noch nicht gestartet sein.
+
 ### /room `GET`
 Ohne Parameter: Gibt alle Raume zurück die der Nutzer erstellt hat oder an 
 welchen er teilgenommen hat. Die Benutzer-UUID muss im Header angegeben werden.

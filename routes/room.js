@@ -45,7 +45,7 @@ router.post('/create', async function(req, res, next) {
                 });
             } else {
                 res.status(400);
-                res.send('Fehler beim erstellen des Raums.');
+                res.send('Fehler beim Erstellen des Raums.');
             }
 
         }
@@ -101,6 +101,40 @@ router.post('/join', async function(req, res, next) {
     }else{
         res.status(400);
         res.send('Fehler beim Beitreten des Raums.');
+    }
+
+});
+
+router.post('/leave', async function(req, res, next) {
+
+    if (!req.headers.guest_uuid){
+        res.status(400);
+        res.send( "Ungültige Anfrage!" );
+        return;
+    }
+
+    const room = await RoomDao.isInActiveRoom(req.headers.guest_uuid);
+
+    if (!room || room._owner === req.headers.guest_uuid){
+        res.status(400);
+        res.send( "Nutzer ist in keinem aktiven Raum" );
+        return;
+    }
+
+    if (room._running){
+        res.status(400);
+        res.send( "Raum wurde bereits gestartet und kann deshalb nicht mehr verlassen werden." );
+        return;
+    }
+
+    const success = await RoomDao.deleteParticipant(req.headers.guest_uuid, room._id);
+
+    if (success){
+        res.status(201);
+        res.send( "Raum erfolgreich verlassen" );
+    }else{
+        res.status(400);
+        res.send('Fehler beim Verlassen des Raums');
     }
 
 });
