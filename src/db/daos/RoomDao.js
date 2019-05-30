@@ -40,31 +40,31 @@ class RoomDao{
         let client = await DbClient.getClient();
         try {
 
-            const { rows } = await client.query('SELECT * FROM room WHERE id = $1',[id]);
-            let roomRows = rows;
+            const { rows } = await client.query('SELECT room.id, room.name, room.owner, room.created_on, room.archived, ' +
+                'room.running, room_attribute.name AS attribute_name, room_attribute_value.name AS value_name , ' +
+                'room_attribute_value.color, room_attribute_value.weight FROM room ' +
+                'INNER JOIN room_attribute ON room.id = room_attribute.room_id ' +
+                'INNER JOIN room_attribute_value ON room.id = room_attribute_value.room_id AND room_attribute.name = room_attribute_value.attribute_name ' +
+                'WHERE room.id = $1 ' +
+                'ORDER BY room.id, room_attribute.name',[id]);
 
-            let room;
+            if (rows.length === 0) return;
 
-            if (roomRows && roomRows.length > 0){
-                let rawRoom = roomRows[0];
-                room = new Room(rawRoom.id, rawRoom.name, rawRoom.owner, rawRoom.created_on, rawRoom.archived, rawRoom.running);
+            let room = new Room(rows[0].id, rows[0].name, rows[0].owner, rows[0].created_on, rows[0].archived, rows[0].running);
 
-                const { rows } = await client.query(`SELECT * FROM room_attribute WHERE room_id = '${id}'`);
-                let attributeRows = rows;
+            console.log(rows);
 
-                for (let i in attributeRows){
-                    let attribute = new Attribute(attributeRows[i].name);
-
-                    const { rows } = await client.query(`SELECT * FROM room_attribute_value WHERE room_id = '${id}' AND attribute_name = '${attribute._name}'`);
-                    let attributeValueRows = rows;
-
-                    for (let a in attributeValueRows){
-                        let value = new AttributeValue(attributeValueRows[a].name, attributeValueRows[a].color, attributeValueRows[a].weight);
-                        attribute._values.push(value);
-                    }
-                    room._attributes.push(attribute);
+            let cur_attribute;
+            for (let i in rows){
+                if (!rows.hasOwnProperty(i)) continue;
+                let row = rows[i];
+                if (!cur_attribute || cur_attribute._name !== row.attribute_name){
+                    if (cur_attribute) room._attributes.push(cur_attribute);
+                    cur_attribute = new Attribute(row.attribute_name);
                 }
+                cur_attribute._values.push(new AttributeValue(row.value_name, row.color, row.weight));
             }
+            room._attributes.push(cur_attribute);
 
             return room;
         } catch (e) {
@@ -162,6 +162,23 @@ class RoomDao{
             return true;
         } catch (e) {
             await client.query('ROLLBACK');
+            console.log(e);
+            return false;
+        } finally {
+            client.end();
+        }
+    }
+
+    static async deleteParticipant(uuid, roomId){
+        let client = await DbClient.getClient();
+
+        try {
+
+            await client.query('DELETE FROM room_participant WHERE guest_id = $1 AND room_id = $2',[uuid, roomId]);
+
+            return true;
+
+        } catch (e) {
             console.log(e);
             return false;
         } finally {
