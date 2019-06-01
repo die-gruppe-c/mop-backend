@@ -37,7 +37,7 @@ CREATE TABLE room_participant_attribute(
 	guest_id VARCHAR (36),
 	attribute VARCHAR (50),
 	attribute_value VARCHAR (50),
-	PRIMARY KEY (room_id, guest_id, attribute),
+	PRIMARY KEY (room_id, guest_id, attribute, attribute_value),
 	FOREIGN KEY (room_id, guest_id) REFERENCES room_participant (room_id, guest_id) ON DELETE CASCADE,
 	FOREIGN KEY (attribute, attribute_value, room_id) REFERENCES room_attribute_value (attribute_name, name, room_id) ON DELETE CASCADE
 );

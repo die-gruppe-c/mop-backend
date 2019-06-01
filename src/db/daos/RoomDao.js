@@ -48,25 +48,11 @@ class RoomDao{
                 'WHERE room.id = $1 ' +
                 'ORDER BY room.id, room_attribute.name',[id]);
 
-            if (rows.length === 0) return;
+            let rooms = this._parseRoomRows(rows);
 
-            let room = new Room(rows[0].id, rows[0].name, rows[0].owner, rows[0].created_on, rows[0].archived, rows[0].running);
+            if (rooms.length > 0) return rooms[0];
+            else return false;
 
-            console.log(rows);
-
-            let cur_attribute;
-            for (let i in rows){
-                if (!rows.hasOwnProperty(i)) continue;
-                let row = rows[i];
-                if (!cur_attribute || cur_attribute._name !== row.attribute_name){
-                    if (cur_attribute) room._attributes.push(cur_attribute);
-                    cur_attribute = new Attribute(row.attribute_name);
-                }
-                cur_attribute._values.push(new AttributeValue(row.value_name, row.color, row.weight));
-            }
-            room._attributes.push(cur_attribute);
-
-            return room;
         } catch (e) {
             console.log(e);
             return false;
@@ -81,36 +67,17 @@ class RoomDao{
         let client = await DbClient.getClient();
         try {
 
-            let rooms = [];
 
-            const { rows } = await client.query('SELECT * FROM room WHERE owner = $1',[uuid]);
-            let roomRows = rows;
+            const { rows } = await client.query('SELECT room.id, room.name, room.owner, room.created_on, room.archived, ' +
+                'room.running, room_attribute.name AS attribute_name, room_attribute_value.name AS value_name , ' +
+                'room_attribute_value.color, room_attribute_value.weight FROM room ' +
+                'INNER JOIN room_attribute ON room.id = room_attribute.room_id ' +
+                'INNER JOIN room_attribute_value ON room.id = room_attribute_value.room_id AND room_attribute.name = room_attribute_value.attribute_name ' +
+                'WHERE room.id = $1 ' +
+                'ORDER BY room.owner, room_attribute.name',[uuid]);
 
-            for (let r in roomRows) {
+            return this._parseRoomRows(rows);
 
-                let rawRoom = roomRows[r];
-                let room = new Room(rawRoom.id, rawRoom.name, rawRoom.owner, rawRoom.created_on, rawRoom.archived, rawRoom.running);
-
-                const {rows} = await client.query(`SELECT * FROM room_attribute WHERE room_id = '${room._id}'`);
-                let attributeRows = rows;
-
-                for (let i in attributeRows) {
-                    let attribute = new Attribute(attributeRows[i].name);
-
-                    const {rows} = await client.query(`SELECT * FROM room_attribute_value WHERE room_id = '${room._id}' AND attribute_name = '${attribute._name}'`);
-                    let attributeValueRows = rows;
-
-                    for (let a in attributeValueRows) {
-                        let value = new AttributeValue(attributeValueRows[a].name, attributeValueRows[a].color, attributeValueRows[a].weight);
-                        attribute._values.push(value);
-                    }
-                    room._attributes.push(attribute);
-                }
-
-                rooms.push(room);
-            }
-
-            return rooms;
         } catch (e) {
             console.log(e);
             return false;
@@ -118,6 +85,37 @@ class RoomDao{
             client.end();
         }
 
+    }
+
+    static _parseRoomRows(rows){
+        let rooms = [];
+
+        if (rows.length === 0) return false;
+
+        let cur_room;
+        let cur_attribute;
+        for (let i in rows){
+            if (!rows.hasOwnProperty(i)) continue;
+            let row = rows[i];
+
+            if (!cur_room || cur_room._id !== row.id){
+                if (cur_room){
+                    if (cur_attribute) cur_room._attributes.push(cur_attribute);
+                    rooms.push(cur_room);
+                }
+                cur_room = new Room(row.id, row.name, row.owner, row.created_on, row.archived, row.running);
+            }
+
+            if (!cur_attribute || cur_attribute._name !== row.attribute_name){
+                if (cur_attribute) cur_room._attributes.push(cur_attribute);
+                cur_attribute = new Attribute(row.attribute_name);
+            }
+            cur_attribute._values.push(new AttributeValue(row.value_name, row.color, row.weight));
+        }
+        cur_room._attributes.push(cur_attribute);
+        rooms.push(cur_room);
+
+        return rooms;
     }
 
     static async getRoomsParticipated(uuid){
@@ -190,38 +188,25 @@ class RoomDao{
         let client = await DbClient.getClient();
         try {
 
-            let { rows } = await client.query('SELECT * FROM room_participant WHERE guest_id = $1 AND room_id = $2',[uuid, roomId]);
-            let participantRows = rows;
+            let { rows } = await client.query('SELECT room_participant.room_id, room_participant.guest_id, room_participant.guest_name, ' +
+                'room_participant.created_by_owner, room_participant_attribute.attribute, ' +
+                'room_participant_attribute.attribute_value, room_attribute_value.color, ' +
+                'room_attribute_value. weight ' +
+                'FROM room_participant INNER JOIN room_participant_attribute ON ' +
+                'room_participant.room_id = room_participant_attribute.room_id AND ' +
+                'room_participant.guest_id = room_participant_attribute.guest_id ' +
+                'INNER JOIN room_attribute_value ON ' +
+                'room_participant.room_id = room_attribute_value.room_id AND ' +
+                'room_participant_attribute.attribute = room_attribute_value.attribute_name AND ' +
+                'room_participant_attribute.attribute_value = room_attribute_value.name ' +
+                'WHERE room_participant.room_id = $1 AND room_participant.guest_id = $2' +
+                'ORDER BY room_participant.guest_id;',[roomId, uuid]);
 
-            if (participantRows.length === 0) return false;
+            let guests = this._parseParticipantRows(rows);
 
-            let guest = new Guest(participantRows[0].room_id, participantRows[0].guest_id, participantRows[0].guest_name, participantRows[0].created_by_owner);
+            if (guests.length === 0) return false;
 
-            rows = await client.query('SELECT * FROM room_participant_attribute WHERE room_id = $1 AND guest_id = $2', [roomId, uuid]);
-            let attributeRows = rows.rows;
-
-            for (let i in attributeRows){
-                let attribute;
-
-                for (let l in guest._attributes) {
-                    if (guest._attributes[l]._name === attributeRows[i].attribute) attribute = guest._attributes[l];
-                }
-
-                if (!attribute){
-                    attribute = new Attribute(attributeRows[i].attribute);
-                    guest._attributes.push(attribute);
-                }
-
-                let {rows} = await client.query('SELECT * FROM room_attribute_value WHERE name = $1 AND attribute_name = $2 AND room_id = $3',
-                    [attributeRows[i].attribute_value,attribute._name, guest._roomId]);
-                let attributeValueRows = rows;
-
-                if (attributeValueRows.length === 0) continue;
-
-                attribute._values.push(new AttributeValue(attributeRows[i].attribute_value, attributeValueRows[0].color, attributeValueRows[0].weight));
-            }
-
-            return guest;
+            return guests[0];
 
         } catch (e) {
             console.log(e);
@@ -235,43 +220,21 @@ class RoomDao{
         let client = await DbClient.getClient();
         try {
 
-            let guests = [];
+            let { rows } = await client.query('SELECT room_participant.room_id, room_participant.guest_id, room_participant.guest_name, ' +
+                'room_participant.created_by_owner, room_participant_attribute.attribute, ' +
+                'room_participant_attribute.attribute_value, room_attribute_value.color, ' +
+                'room_attribute_value. weight ' +
+                'FROM room_participant INNER JOIN room_participant_attribute ON ' +
+                'room_participant.room_id = room_participant_attribute.room_id AND ' +
+                'room_participant.guest_id = room_participant_attribute.guest_id ' +
+                'INNER JOIN room_attribute_value ON ' +
+                'room_participant.room_id = room_attribute_value.room_id AND ' +
+                'room_participant_attribute.attribute = room_attribute_value.attribute_name AND ' +
+                'room_participant_attribute.attribute_value = room_attribute_value.name ' +
+                'WHERE room_participant.room_id = $1 ' +
+                'ORDER BY room_participant.guest_id;',[roomId]);
 
-            let { rows } = await client.query('SELECT * FROM room_participant WHERE room_id = $1',[roomId]);
-            let participantRows = rows;
-
-            for (let a in participantRows) {
-
-                let guest = new Guest(participantRows[a].room_id, participantRows[a].guest_id, participantRows[a].guest_name, participantRows[a].created_by_owner);
-
-                let { rows } = await client.query('SELECT * FROM room_participant_attribute WHERE room_id = $1 AND guest_id = $2', [roomId, guest._uuid]);
-                let attributeRows = rows;
-
-                for (let i in attributeRows) {
-                    let attribute;
-
-                    for (let l in guest._attributes) {
-                        if (guest._attributes[l]._name === attributeRows[i].attribute) attribute = guest._attributes[l];
-                    }
-
-                    if (!attribute) {
-                        attribute = new Attribute(attributeRows[i].attribute);
-                        guest._attributes.push(attribute);
-                    }
-
-                    let {rows} = await client.query('SELECT * FROM room_attribute_value WHERE name = $1 AND attribute_name = $2 AND room_id = $3',
-                        [attributeRows[i].attribute_value, attribute._name, guest._roomId]);
-                    let attributeValueRows = rows;
-
-                    if (attributeValueRows.length === 0) continue;
-
-                    attribute._values.push(new AttributeValue(attributeRows[i].attribute_value, attributeValueRows[0].color, attributeValueRows[0].weight));
-                }
-
-                guests.push(guest);
-            }
-
-            return guests;
+            return this._parseParticipantRows(rows);
 
         } catch (e) {
             console.log(e);
@@ -279,6 +242,37 @@ class RoomDao{
         } finally {
             client.end();
         }
+    }
+
+    static _parseParticipantRows(rows){
+        let participants = [];
+
+        if (rows.length === 0) return false;
+
+        let cur_participant;
+        let cur_attribute;
+        for (let i in rows){
+            if (!rows.hasOwnProperty(i)) continue;
+            let row = rows[i];
+
+            if (!cur_participant || cur_participant._uuid !== row.guest_id){
+                if (cur_participant){
+                    if (cur_attribute) cur_participant._attributes.push(cur_attribute);
+                    participants.push(cur_participant);
+                }
+                cur_participant = new Guest(row.room_id, row.guest_id, row.guest_name, row.created_by_owner);
+            }
+
+            if (!cur_attribute || cur_attribute._name !== row.attribute){
+                if (cur_attribute) cur_participant._attributes.push(cur_attribute);
+                cur_attribute = new Attribute(row.attribute);
+            }
+            cur_attribute._values.push(new AttributeValue(row.attribute_value, row.color, row.weight));
+        }
+        cur_participant._attributes.push(cur_attribute);
+        participants.push(cur_participant);
+
+        return participants;
     }
 
     static async isInActiveRoom(uuid){
