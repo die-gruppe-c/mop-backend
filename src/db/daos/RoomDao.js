@@ -45,8 +45,8 @@ class RoomDao{
                 "room_attribute_value.color, room_attribute_value.weight FROM room " +
                 "INNER JOIN room_attribute ON room.id = room_attribute.room_id " +
                 "INNER JOIN room_attribute_value ON room.id = room_attribute_value.room_id AND room_attribute.name = room_attribute_value.attribute_name " +
-                "WHERE room.id = '$1' " +
-                "ORDER BY room.id, room_attribute.name",[id]);
+                `WHERE room.id = '${id}' ` +
+                "ORDER BY room.id, room_attribute.name");
 
             let rooms = this._parseRoomRows(rows);
 
@@ -73,8 +73,8 @@ class RoomDao{
                 "room_attribute_value.color, room_attribute_value.weight FROM room " +
                 "INNER JOIN room_attribute ON room.id = room_attribute.room_id " +
                 "INNER JOIN room_attribute_value ON room.id = room_attribute_value.room_id AND room_attribute.name = room_attribute_value.attribute_name " +
-                "WHERE room.id = '$1' " +
-                "ORDER BY room.owner, room_attribute.name",[uuid]);
+                `WHERE room.id = '${uuid}' ` +
+                "ORDER BY room.owner, room_attribute.name");
 
             return this._parseRoomRows(rows);
 
@@ -199,8 +199,8 @@ class RoomDao{
                 "room_participant.room_id = room_attribute_value.room_id AND " +
                 "room_participant_attribute.attribute = room_attribute_value.attribute_name AND " +
                 "room_participant_attribute.attribute_value = room_attribute_value.name " +
-                "WHERE room_participant.room_id = $1 AND room_participant.guest_id = '$2' " +
-                "ORDER BY room_participant.guest_id;",[roomId, uuid]);
+                `WHERE room_participant.room_id = '${roomId}' AND room_participant.guest_id = '${uuid}' ` +
+                "ORDER BY room_participant.guest_id;");
 
             let guests = this._parseParticipantRows(rows);
 
@@ -231,8 +231,8 @@ class RoomDao{
                 "room_participant.room_id = room_attribute_value.room_id AND " +
                 "room_participant_attribute.attribute = room_attribute_value.attribute_name AND " +
                 "room_participant_attribute.attribute_value = room_attribute_value.name " +
-                "WHERE room_participant.room_id = $1 " +
-                "ORDER BY room_participant.guest_id;",[roomId]);
+                `WHERE room_participant.room_id = '${roomId}' ` +
+                "ORDER BY room_participant.guest_id;");
 
             return this._parseParticipantRows(rows);
 
