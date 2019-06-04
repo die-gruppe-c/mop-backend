@@ -12,7 +12,12 @@ class SpeechList {
 
     add(id, type){
         if (isNaN(id)) return;
-        this._list.push(new SpeechRequest(id, type));
+
+        let filteredList = this._list.filter(function (item) {
+            return item.id === id;
+        });
+
+        if (filteredList.length === 0) this._list.push(new SpeechRequest(id, type));
     }
 
     remove(id){
@@ -44,7 +49,7 @@ class SpeechList {
 
         let found = this.remove(id);
 
-        if (found && idx < this._list.length){
+        if (found){
             this._list.splice(idx,0,found);
         }
     }
