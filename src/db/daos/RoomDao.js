@@ -50,6 +50,8 @@ class RoomDao{
 
             let rooms = this._parseRoomRows(rows);
 
+            console.log(rooms);
+
             if (rooms.length > 0) return rooms[0];
             else return false;
 
