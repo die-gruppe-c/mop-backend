@@ -40,7 +40,7 @@ class SpeechList {
     }
 
     reorder(id, idx) {
-        if(!this._checkListBounds(id) || !this._checkListBounds(idx)) return;
+        if(isNaN(id) || !this._checkListBounds(idx)) return;
 
         let found = this.remove(id);
 
