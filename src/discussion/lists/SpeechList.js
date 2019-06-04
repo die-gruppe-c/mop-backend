@@ -16,19 +16,19 @@ class SpeechList {
     }
 
     remove(id){
-        let success = false;
+        let result = false;
 
-        if (isNaN(id)) return success;
+        if (isNaN(id)) return false;
 
         for(let i = 0; i < this._list.length; i++) {
-            if (this._list[i].id=== id) {
+            if (this._list[i].id === id) {
+                result = this._list[i];
                 this._list.splice(i, 1);
                 i--;
-                success = true;
             }
         }
 
-        return success;
+        return result;
     }
 
     removeFirst(){
@@ -45,7 +45,7 @@ class SpeechList {
         let found = this.remove(id);
 
         if (found && idx < this._list.length){
-            this._list.splice(idx,0,id);
+            this._list.splice(idx,0,found);
         }
     }
 
