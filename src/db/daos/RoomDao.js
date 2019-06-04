@@ -50,8 +50,6 @@ class RoomDao{
 
             let rooms = this._parseRoomRows(rows);
 
-            console.log(rooms);
-
             if (rooms.length > 0) return rooms[0];
             else return false;
 
@@ -92,7 +90,7 @@ class RoomDao{
     static _parseRoomRows(rows){
         let rooms = [];
 
-        if (rows.length === 0) return false;
+        if (rows.length === 0) return rooms;
 
         let cur_room;
         let cur_attribute;
@@ -249,7 +247,7 @@ class RoomDao{
     static _parseParticipantRows(rows){
         let participants = [];
 
-        if (rows.length === 0) return false;
+        if (rows.length === 0) return participants;
 
         let cur_participant;
         let cur_attribute;
