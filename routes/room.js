@@ -160,6 +160,8 @@ router.get('/', async function(req, res, next) {
 
         let roomsJson = [];
 
+        console.log(myRooms);
+
         myRooms.concat(roomsParticipated).forEach(function (room) {
             roomsJson.push(room.toJson(req.headers.guest_uuid));
         });
