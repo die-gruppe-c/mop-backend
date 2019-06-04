@@ -73,7 +73,7 @@ class RoomDao{
                 "room_attribute_value.color, room_attribute_value.weight FROM room " +
                 "INNER JOIN room_attribute ON room.id = room_attribute.room_id " +
                 "INNER JOIN room_attribute_value ON room.id = room_attribute_value.room_id AND room_attribute.name = room_attribute_value.attribute_name " +
-                `WHERE room.id = '${uuid}' ` +
+                `WHERE room.owner = '${uuid}' ` +
                 "ORDER BY room.owner, room_attribute.name");
 
             return this._parseRoomRows(rows);
