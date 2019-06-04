@@ -68,6 +68,7 @@ class DiscussionRoom{
             this._moderator.send(this._wantToSpeakList.toMessage());
             this._moderator.send(this._speechList.toMessage());
             this._moderator.send(this._sortedUserList.toMessage());
+            this._moderator.send(this._speechHandler.toMessage());
         })();
 
 
@@ -103,6 +104,7 @@ class DiscussionRoom{
         (async () => {
             await this._broadcastUserData();
             participant.send(this._speechList.toMessage());
+            participant.send(this._speechHandler.toMessage());
         })();
 
     }

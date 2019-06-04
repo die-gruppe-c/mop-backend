@@ -40,7 +40,7 @@ class SpeechList {
     }
 
     reorder(id, idx) {
-        if (isNaN(id) || isNaN(idx)) return;
+        if(!this._checkListBounds(id) || !this._checkListBounds(idx)) return;
 
         let found = this.remove(id);
 
@@ -51,6 +51,15 @@ class SpeechList {
 
     toMessage(){
         return Util.wrapResponse(MESSAGE_KEY, SpeechRequest.listToJson(this._list));
+    }
+
+    _checkListBounds(idx){
+        if(isNaN(idx)) return false;
+
+        if (this._list.length === 0) return false;
+
+        return !(idx < 0 || idx >= this._list.length);
+
     }
 }
 
