@@ -353,7 +353,7 @@ class DiscussionRoom{
             if (statusChanged) {
                 this._broadcastUserData();
             }
-        }, 6000);
+        }, 20000);
     }
 
     _monitorConnection(participant){
