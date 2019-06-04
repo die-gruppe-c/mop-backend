@@ -40,13 +40,13 @@ class RoomDao{
         let client = await DbClient.getClient();
         try {
 
-            const { rows } = await client.query('SELECT room.id, room.name, room.owner, room.created_on, room.archived, ' +
-                'room.running, room_attribute.name AS attribute_name, room_attribute_value.name AS value_name , ' +
-                'room_attribute_value.color, room_attribute_value.weight FROM room ' +
-                'INNER JOIN room_attribute ON room.id = room_attribute.room_id ' +
-                'INNER JOIN room_attribute_value ON room.id = room_attribute_value.room_id AND room_attribute.name = room_attribute_value.attribute_name ' +
-                'WHERE room.id = $1 ' +
-                'ORDER BY room.id, room_attribute.name',[id]);
+            const { rows } = await client.query("SELECT room.id, room.name, room.owner, room.created_on, room.archived, " +
+                "room.running, room_attribute.name AS attribute_name, room_attribute_value.name AS value_name , " +
+                "room_attribute_value.color, room_attribute_value.weight FROM room " +
+                "INNER JOIN room_attribute ON room.id = room_attribute.room_id " +
+                "INNER JOIN room_attribute_value ON room.id = room_attribute_value.room_id AND room_attribute.name = room_attribute_value.attribute_name " +
+                "WHERE room.id = '$1' " +
+                "ORDER BY room.id, room_attribute.name",[id]);
 
             let rooms = this._parseRoomRows(rows);
 
@@ -68,13 +68,13 @@ class RoomDao{
         try {
 
 
-            const { rows } = await client.query('SELECT room.id, room.name, room.owner, room.created_on, room.archived, ' +
-                'room.running, room_attribute.name AS attribute_name, room_attribute_value.name AS value_name , ' +
-                'room_attribute_value.color, room_attribute_value.weight FROM room ' +
-                'INNER JOIN room_attribute ON room.id = room_attribute.room_id ' +
-                'INNER JOIN room_attribute_value ON room.id = room_attribute_value.room_id AND room_attribute.name = room_attribute_value.attribute_name ' +
-                'WHERE room.id = $1 ' +
-                'ORDER BY room.owner, room_attribute.name',[uuid]);
+            const { rows } = await client.query("SELECT room.id, room.name, room.owner, room.created_on, room.archived, " +
+                "room.running, room_attribute.name AS attribute_name, room_attribute_value.name AS value_name , " +
+                "room_attribute_value.color, room_attribute_value.weight FROM room " +
+                "INNER JOIN room_attribute ON room.id = room_attribute.room_id " +
+                "INNER JOIN room_attribute_value ON room.id = room_attribute_value.room_id AND room_attribute.name = room_attribute_value.attribute_name " +
+                "WHERE room.id = '$1' " +
+                "ORDER BY room.owner, room_attribute.name",[uuid]);
 
             return this._parseRoomRows(rows);
 
@@ -188,19 +188,19 @@ class RoomDao{
         let client = await DbClient.getClient();
         try {
 
-            let { rows } = await client.query('SELECT room_participant.room_id, room_participant.guest_id, room_participant.guest_name, ' +
-                'room_participant.created_by_owner, room_participant_attribute.attribute, ' +
-                'room_participant_attribute.attribute_value, room_attribute_value.color, ' +
-                'room_attribute_value. weight ' +
-                'FROM room_participant INNER JOIN room_participant_attribute ON ' +
-                'room_participant.room_id = room_participant_attribute.room_id AND ' +
-                'room_participant.guest_id = room_participant_attribute.guest_id ' +
-                'INNER JOIN room_attribute_value ON ' +
-                'room_participant.room_id = room_attribute_value.room_id AND ' +
-                'room_participant_attribute.attribute = room_attribute_value.attribute_name AND ' +
-                'room_participant_attribute.attribute_value = room_attribute_value.name ' +
-                'WHERE room_participant.room_id = $1 AND room_participant.guest_id = $2' +
-                'ORDER BY room_participant.guest_id;',[roomId, uuid]);
+            let { rows } = await client.query("SELECT room_participant.room_id, room_participant.guest_id, room_participant.guest_name, " +
+                "room_participant.created_by_owner, room_participant_attribute.attribute, " +
+                "room_participant_attribute.attribute_value, room_attribute_value.color, " +
+                "room_attribute_value. weight " +
+                "FROM room_participant INNER JOIN room_participant_attribute ON " +
+                "room_participant.room_id = room_participant_attribute.room_id AND " +
+                "room_participant.guest_id = room_participant_attribute.guest_id " +
+                "INNER JOIN room_attribute_value ON " +
+                "room_participant.room_id = room_attribute_value.room_id AND " +
+                "room_participant_attribute.attribute = room_attribute_value.attribute_name AND " +
+                "room_participant_attribute.attribute_value = room_attribute_value.name " +
+                "WHERE room_participant.room_id = $1 AND room_participant.guest_id = '$2' " +
+                "ORDER BY room_participant.guest_id;",[roomId, uuid]);
 
             let guests = this._parseParticipantRows(rows);
 
@@ -220,19 +220,19 @@ class RoomDao{
         let client = await DbClient.getClient();
         try {
 
-            let { rows } = await client.query('SELECT room_participant.room_id, room_participant.guest_id, room_participant.guest_name, ' +
-                'room_participant.created_by_owner, room_participant_attribute.attribute, ' +
-                'room_participant_attribute.attribute_value, room_attribute_value.color, ' +
-                'room_attribute_value. weight ' +
-                'FROM room_participant INNER JOIN room_participant_attribute ON ' +
-                'room_participant.room_id = room_participant_attribute.room_id AND ' +
-                'room_participant.guest_id = room_participant_attribute.guest_id ' +
-                'INNER JOIN room_attribute_value ON ' +
-                'room_participant.room_id = room_attribute_value.room_id AND ' +
-                'room_participant_attribute.attribute = room_attribute_value.attribute_name AND ' +
-                'room_participant_attribute.attribute_value = room_attribute_value.name ' +
-                'WHERE room_participant.room_id = $1 ' +
-                'ORDER BY room_participant.guest_id;',[roomId]);
+            let { rows } = await client.query("SELECT room_participant.room_id, room_participant.guest_id, room_participant.guest_name, " +
+                "room_participant.created_by_owner, room_participant_attribute.attribute, " +
+                "room_participant_attribute.attribute_value, room_attribute_value.color, " +
+                "room_attribute_value. weight " +
+                "FROM room_participant INNER JOIN room_participant_attribute ON " +
+                "room_participant.room_id = room_participant_attribute.room_id AND " +
+                "room_participant.guest_id = room_participant_attribute.guest_id " +
+                "INNER JOIN room_attribute_value ON " +
+                "room_participant.room_id = room_attribute_value.room_id AND " +
+                "room_participant_attribute.attribute = room_attribute_value.attribute_name AND " +
+                "room_participant_attribute.attribute_value = room_attribute_value.name " +
+                "WHERE room_participant.room_id = $1 " +
+                "ORDER BY room_participant.guest_id;",[roomId]);
 
             return this._parseParticipantRows(rows);
 
