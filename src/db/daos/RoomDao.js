@@ -304,6 +304,20 @@ class RoomDao{
         let client = await DbClient.getClient();
         try {
             await client.query('UPDATE room SET running = $1 WHERE id = $2', [running, roomId]);
+            return true;
+        } catch (e) {
+            console.log(e);
+            return false;
+        } finally {
+            client.end();
+        }
+    }
+
+    static async archiveRoom(roomId){
+        let client = await DbClient.getClient();
+        try {
+            await client.query('UPDATE room SET archived = $1 WHERE id = $2', [true, roomId]);
+            return true;
         } catch (e) {
             console.log(e);
             return false;

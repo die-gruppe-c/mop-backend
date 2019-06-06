@@ -19,6 +19,7 @@ class Stopwatch {
 
     pause(){
         if (this._running){
+            this._running = false;
             this._interimTime += new Date().getTime() - this._startTime;
             this._startTime = 0;
         }
@@ -29,7 +30,11 @@ class Stopwatch {
     }
 
     getDuration(){
-        return this._interimTime + (new Date().getTime() - this._startTime);
+        if (this._running){
+            return this._interimTime + (new Date().getTime() - this._startTime);
+        } else{
+            return this._interimTime;
+        }
     }
 
 }

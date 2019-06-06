@@ -4,7 +4,8 @@ CREATE TABLE room(
 	owner VARCHAR (36) NOT NULL,
 	created_on TIMESTAMP NOT NULL,
 	archived BOOLEAN NOT NULL,
-	running BOOLEAN NOT NULL
+	running BOOLEAN NOT NULL,
+	runtime INT
 );
 
 CREATE TABLE room_attribute(
@@ -40,6 +41,14 @@ CREATE TABLE room_participant_attribute(
 	PRIMARY KEY (room_id, guest_id, attribute, attribute_value),
 	FOREIGN KEY (room_id, guest_id) REFERENCES room_participant (room_id, guest_id) ON DELETE CASCADE,
 	FOREIGN KEY (attribute, attribute_value, room_id) REFERENCES room_attribute_value (attribute_name, name, room_id) ON DELETE CASCADE
+);
+
+CREATE TABLE speech_statistic(
+    id SERIAL PRIMARY KEY,
+    room_id INT REFERENCES room (id) ON DELETE CASCADE,
+    guest_id VARCHAR (36),
+    duration INT,
+    FOREIGN KEY (room_id, guest_id) REFERENCES room_participant (room_id, guest_id) ON DELETE CASCADE,
 );
 
 

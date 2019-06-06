@@ -20,6 +20,7 @@ const updateUserListRegex = /^updateUserList/;
 const addUserToSpeechListRegex = /^addUserToSpeechList:/;
 const removeUserFromSpeechListRegex = /^removeUserFromSpeechList:/;
 const changeSortOrderRegex = /^changeSortOrder:/;
+const archiveRegex = /^archieve/;
 //both
 const startSpeechContribution = /^startSpeech/;
 const pauseSpeechContribution = /^pauseSpeech/;
@@ -30,6 +31,11 @@ const STARTED = 'started';
 const ALL_USERS = 'allUsers';
 const SPEECH_TYPES = 'speechTypes';
 const ROOM = 'room';
+const ARCHIVED = 'archived';
+
+
+const CHECK_CONNECTION_INTERVAL = 20000;
+const UPDATE_SPEECH_STATISTIC_INTERVAL = 5000;
 
 class DiscussionRoom{
 
@@ -43,11 +49,12 @@ class DiscussionRoom{
         this._speechList = new SpeechList();
 
         this._speechHandler = new SpeechContributionHandler();
-        this._statisticHandler = new StatisticHandler();
+        this._statisticHandler = new StatisticHandler(room);
 
         this._stopWatch = new Stopwatch();
 
         this._checkConnectionsAlive();
+        this._updateSpeechStatistics();
     }
 
     getRoomId(){
@@ -126,6 +133,9 @@ class DiscussionRoom{
                         this._broadcastAll(this._speechList.toMessage());
                     }
                     break;
+                case archiveRegex.test(request):
+                    this._archiveRoom();
+                    break;
                 default:
                     this._handleCommonRequests(moderator, request);
             }
@@ -179,7 +189,7 @@ class DiscussionRoom{
                 this._speechHandler.pause();
                 let guest = this._getParticipantFromFrontendId(this._speechHandler.getSpeaker());
                 if (!guest) return;
-                this._statisticHandler.addRecord(guest,this._speechHandler.getSpeechType(),this._speechHandler.getDuration());
+                this._statisticHandler.addRecord(guest, this._speechHandler.getDuration());
                 this._speechHandler.stop();
                 let nextSpeaker = this._speechList.removeFirst();
                 if (nextSpeaker) this._speechHandler.setSpeaker(nextSpeaker.id, nextSpeaker.speechType);
@@ -217,7 +227,14 @@ class DiscussionRoom{
             await this._broadcastUserData();
             this._moderator.send(this._sortedUserList.toMessage());
         }
+    }
 
+    async _archiveRoom(){
+        let success = await RoomDao.archiveRoom(this.getRoomId());
+
+        if (success){
+            this._broadcastAll(Util.wrapResponse(ARCHIVED));
+        }
     }
 
     async _addUserWhoWantsToSpeechList(request){
@@ -324,46 +341,6 @@ class DiscussionRoom{
         }
     }
 
-    _checkConnectionsAlive(){
-        //Check if connection is still alive
-        setInterval(() => {
-            let statusChanged = false;
-            for(let i = 0; i < this._clients.length; i++){
-                let conn = this._clients[i];
-
-                if (!conn.isAlive) {
-                    statusChanged = true;
-                    conn.terminate();
-
-                    //remove from list
-                    this._clients.splice(i, 1);
-                    i--;
-
-                    continue;
-                }
-
-                conn.isAlive = false;
-                try{
-                    conn.ping();
-                }catch (e) {
-                    //connection is not alive anymore
-                }
-            }
-
-            if (statusChanged) {
-                this._broadcastUserData();
-            }
-        }, 20000);
-    }
-
-    _monitorConnection(participant){
-        participant.isAlive = true;
-
-        participant.on('pong', () => {
-            participant.isAlive = true;
-        });
-    }
-
     _broadcastToParticipants(message){
         for (let i in this._clients) {
             try{
@@ -383,6 +360,51 @@ class DiscussionRoom{
         this._broadcastToParticipants(message);
     }
 
+    _checkConnectionsAlive(){
+        //Check if connection is still alive
+        setInterval(() => {
+            let statusChanged = false;
+            for(let i = 0; i < this._clients.length; i++){
+                let conn = this._clients[i];
+
+                if (!conn.isAlive) {
+                    statusChanged = true;
+                    //conn.terminate();
+
+                    //remove from list
+                    this._clients.splice(i, 1);
+                    i--;
+
+                    continue;
+                }
+
+                conn.isAlive = false;
+                try{
+                    conn.ping();
+                }catch (e) {
+                    //connection is not alive anymore
+                }
+            }
+
+            if (statusChanged) {
+                this._broadcastUserData();
+            }
+        }, CHECK_CONNECTION_INTERVAL);
+    }
+
+    _monitorConnection(participant){
+        participant.isAlive = true;
+
+        participant.on('pong', () => {
+            participant.isAlive = true;
+        });
+    }
+
+    _updateSpeechStatistics() {
+        setInterval(() => {
+            this._moderator.send(this._statisticHandler.toMessage());
+        }, UPDATE_SPEECH_STATISTIC_INTERVAL);
+    }
 }
 
 module.exports = DiscussionRoom;

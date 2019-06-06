@@ -217,6 +217,9 @@ Pausiert den Redebeitrag des aktuellen Redners
 Stoppt den Redebeitrag des aktuellen Redners und macht den
 ersten auf der Redeliste zum aktuellen Redner.
 
+#### archieve
+Lässt Moderator den Raum archivieren.
+
 ### Antworten
 
 Antworten werden in einem Wrapper verschickt:
@@ -231,6 +234,9 @@ Antworten werden in einem Wrapper verschickt:
 
 #### started
 Benachrichtigt alle dass der Raum vom Moderator gestarted wurde.
+
+#### archived
+Benachrichtigt alle dass der Raum archiviert wurde.
 
 #### speechTypes
 Redebeitrag-Typen. Bei senden an den Server immer die Id und nicht den
@@ -343,6 +349,26 @@ Aktueller Redner
               "speechType": 1,
               "running": true,
               "duration": 34342
+          }
+}
+```
+
+#### speechStatistics
+Redesatistik
+
+Gesamtzeit in Millisekunden. Werte prozentual zur Gesamtzeit.
+
+```
+{
+  "command": "speechStatistics",
+  "data": {
+              "Geschlecht": {
+                "total": 34534545,
+                "values": {
+                    "männlich": 60,
+                    "weiblich": 40
+                }
+              }
           }
 }
 ```

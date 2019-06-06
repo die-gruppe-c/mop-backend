@@ -40,14 +40,6 @@ class SpeechContributionHandler {
         return this._currentlySpeaking;
     }
 
-    getSpeechType(){
-        return this._speechType;
-    }
-
-    isSpeaking(){
-        return this._stopwatch.isRunning();
-    }
-
     getDuration(){
         this._stopwatch.getDuration();
     }
@@ -56,7 +48,7 @@ class SpeechContributionHandler {
         return Util.wrapResponse(MESSAGE_KEY, {
             speaker: this.getSpeaker(),
             speechType: this._speechType,
-            running: this.isSpeaking(),
+            running: this._stopwatch.isRunning(),
             duration: this._stopwatch.getDuration()
         } );
     }
