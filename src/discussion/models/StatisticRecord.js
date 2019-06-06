@@ -26,7 +26,7 @@ class StatisticRecord {
         let total = this._getTotalDuration();
 
         for (let i in this._values){
-            json[i] = Math.floor((this._values[i] / total) * 100);
+            json[i] = total === 0 ? 0 : Math.floor((this._values[i] / total) * 100);
         }
 
         return {
