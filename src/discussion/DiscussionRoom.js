@@ -39,8 +39,9 @@ const UPDATE_SPEECH_STATISTIC_INTERVAL = 5000;
 
 class DiscussionRoom{
 
-    constructor(room){
+    constructor(room, onArchivedCallback){
         this._room = room;
+        this._onRoomArchivedCallback = onArchivedCallback;
         this._clients = [];
         this._allParticipants = [];
 
@@ -235,6 +236,8 @@ class DiscussionRoom{
         if (success){
             this._broadcastAll(Util.wrapResponse(ARCHIVED));
         }
+
+        this._onRoomArchivedCallback(this);
     }
 
     async _addUserWhoWantsToSpeechList(request){

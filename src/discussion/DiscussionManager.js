@@ -48,7 +48,7 @@ class DiscussionManager{
             }
 
             //create discussion room if it doesnt exist
-            discussionRoom = new DiscussionRoom(room);
+            discussionRoom = new DiscussionRoom(room, this._onRoomArchived);
             this._discussionRooms.push(discussionRoom);
         }else{
             discussionRoom = filteredRooms[0];
@@ -63,6 +63,14 @@ class DiscussionManager{
             if (!ws.guest_data) return;
             discussionRoom.addParticipant(ws);
             Util.debugSend(ws,`als Teilnehmer zu Raum ${room._id} hinzugefüt`);
+        }
+    }
+
+    _onRoomArchived(discussionRoom){
+        for( var i = 0; i < this._discussionRooms.length; i++){
+            if ( this._discussionRooms[i] === discussionRoom) {
+                this._discussionRooms.splice(i, 1);
+            }
         }
     }
 
