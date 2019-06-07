@@ -87,6 +87,22 @@ class RoomDao{
 
     }
 
+    static async isGuestParticipantOfRoom(uuid, roomId){
+        let client = await DbClient.getClient();
+        try {
+
+            const { rows } = await client.query(`SELECT * FROM room_participant WHERE room_id = '${roomId}' AND guest_id = '${uuid}'`);
+
+            return rows.length !== 0;
+
+        } catch (e) {
+            console.log(e);
+            return false;
+        } finally {
+            client.end();
+        }
+    }
+
     static _parseRoomRows(rows){
         let rooms = [];
 

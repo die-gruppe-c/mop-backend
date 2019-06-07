@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var RoomDao = require('../src/db/daos/RoomDao');
+var StatisticDao = require('../src/db/daos/StatisticDao');
 var Room = require('../src/db/entities/Room');
 var Guest = require('../src/db/entities/Guest');
 
@@ -184,5 +185,48 @@ router.get('/rejoin', async function(req, res, next) {
         res.send();
     }
 });
+
+router.get('/statistic', async function(req, res, next) {
+    let roomId = req.query.id;
+
+    if (!req.headers.guest_uuid){
+        res.status(400);
+        res.send( "Benutzer-UUID nicht im Header vorhanden!" );
+        return;
+    }
+
+    const room = await RoomDao.getRoomById(roomId);
+
+    if (!room){
+        res.status(400);
+        res.send( "Raum existiert nicht." );
+        return;
+    }
+
+    if (!room._archived){
+        res.status(400);
+        res.send( "Raum wurde noch nicht archiviert" );
+        return;
+    }
+
+    if (room._owner !== req.headers.guest_uuid || !RoomDao.isGuestParticipantOfRoom(req.headers.guest_uuid, roomId)){
+        res.status(400);
+        res.send( "Kein Zugriff auf Raum." );
+        return;
+    }
+
+    let csv = await StatisticDao.getRoomStatistic(roomId);
+
+    let filename = `room_${roomId}`;
+
+    res.writeHead(200, {
+        'Content-Type': 'text/csv',
+        'Content-Disposition': `attachment; filename=${filename}.csv`
+    });
+
+    res.end(csv,"binary");
+
+});
+
 
 module.exports = router;
