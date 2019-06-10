@@ -56,6 +56,8 @@ class DiscussionRoom{
 
         this._checkConnectionsAlive();
         this._updateSpeechStatistics();
+
+        this._stopped = false;
     }
 
     getRoomId(){
@@ -73,16 +75,16 @@ class DiscussionRoom{
         (async () => {
             await this._broadcastUserData();
 
-            this._moderator.send(this._wantToSpeakList.toMessage());
-            this._moderator.send(this._speechList.toMessage());
-            this._moderator.send(this._sortedUserList.toMessage());
-            this._moderator.send(this._speechHandler.toMessage());
+            this._sendToModerator(this._wantToSpeakList.toMessage());
+            this._sendToModerator(this._speechList.toMessage());
+            this._sendToModerator(this._sortedUserList.toMessage());
+            this._sendToModerator(this._speechHandler.toMessage());
         })();
 
 
         this._monitorConnection(moderator);
-        this._moderator.send(DiscussionRoom._speechTypesToMessage());
-        this._moderator.send(Util.wrapResponse(ROOM, this._room.toJson(this._room._owner)));
+        this._sendToModerator(DiscussionRoom._speechTypesToMessage());
+        this._sendToModerator(Util.wrapResponse(ROOM, this._room.toJson(this._room._owner)));
     }
 
     addParticipant(participant){
@@ -106,13 +108,13 @@ class DiscussionRoom{
         });
 
         this._monitorConnection(participant);
-        participant.send(DiscussionRoom._speechTypesToMessage());
-        participant.send(Util.wrapResponse(ROOM, this._room.toJson(participant.guest_data._uuid)));
+        this._sendToClient(participant,DiscussionRoom._speechTypesToMessage());
+        this._sendToClient(participant, Util.wrapResponse(ROOM, this._room.toJson(participant.guest_data._uuid)));
 
         (async () => {
             await this._broadcastUserData();
-            participant.send(this._speechList.toMessage());
-            participant.send(this._speechHandler.toMessage());
+            this._sendToClient(participant, this._speechList.toMessage());
+            this._sendToClient(participant, this._speechHandler.toMessage());
         })();
 
     }
@@ -159,11 +161,11 @@ class DiscussionRoom{
             switch (true) {
                 case wantToSpeakRegex.test(request):
                     this._wantToSpeakList.add(id, Util.parseMessage(wantToSpeakRegex,request));
-                    this._moderator.send(this._wantToSpeakList.toMessage());
+                    this._sendToModerator(this._wantToSpeakList.toMessage());
                     break;
                 case wantNotToSpeakRegex.test(request):
                     this._wantToSpeakList.remove(id);
-                    this._moderator.send(this._wantToSpeakList.toMessage());
+                    this._sendToModerator(this._wantToSpeakList.toMessage());
                     break;
                 default:
                     this._handleCommonRequests(participant, request);
@@ -226,7 +228,7 @@ class DiscussionRoom{
             this._sortedUserList.updateList(this._allParticipants);
 
             await this._broadcastUserData();
-            this._moderator.send(this._sortedUserList.toMessage());
+            this._sendToModerator(this._sortedUserList.toMessage());
         }
     }
 
@@ -235,9 +237,11 @@ class DiscussionRoom{
 
         if (success){
             this._broadcastAll(Util.wrapResponse(ARCHIVED));
-        }
 
-        this._onRoomArchivedCallback(this);
+            this._onRoomArchivedCallback(this);
+
+            this._stopped = true;
+        }
     }
 
     async _addUserWhoWantsToSpeechList(request){
@@ -259,8 +263,6 @@ class DiscussionRoom{
             this._speechHandler.setSpeaker(wantToSpeakItem.id, wantToSpeakItem.speechType);
             this._broadcastAll(this._speechHandler.toMessage());
         }else{
-            Util.debugSend(this._moderator,this._speechList.toMessage());
-            Util.debugSend(this._moderator,this._speechList._list);
             this._speechList.add(wantToSpeakItem.id,wantToSpeakItem.speechType);
             this._broadcastAll(this._speechList.toMessage());
         }
@@ -321,7 +323,7 @@ class DiscussionRoom{
         }
 
         try{
-            this._moderator.send(Util.wrapResponse(ALL_USERS, json));
+            this._sendToModerator(Util.wrapResponse(ALL_USERS, json));
         }catch (e) {
             console.log(e);
         }
@@ -337,7 +339,7 @@ class DiscussionRoom{
                 json.push(guest.toJson(this._clients[i].guest_data._uuid))
             }
             try{
-                this._clients[i].send(Util.wrapResponse(ALL_USERS, json));
+                this._sendToClient(this._clients[i],Util.wrapResponse(ALL_USERS, json));
             }catch (e) {
                 console.log(e);
             }
@@ -346,21 +348,24 @@ class DiscussionRoom{
 
     _broadcastToParticipants(message){
         for (let i in this._clients) {
-            try{
-                this._clients[i].send(message);
-            }catch (e) {
-                console.log(e);
-            }
+            this._sendToClient(this._clients[i], message);
         }
     }
 
     _broadcastAll(message){
-        try{
-            this._moderator.send(message);
-        }catch (e) {
-            console.log(e);
-        }
+        this._sendToModerator(message);
         this._broadcastToParticipants(message);
+    }
+
+    _sendToModerator(message){
+        this._sendToClient(this._moderator,message);
+    }
+
+    _sendToClient(ws_client,message){
+        if (this._stopped) return;
+        ws_client.send(message,function (error) {
+           //console.log(error);
+        });
     }
 
     _checkConnectionsAlive(){
@@ -405,7 +410,9 @@ class DiscussionRoom{
 
     _updateSpeechStatistics() {
         setInterval(() => {
-            this._moderator.send(this._statisticHandler.toMessage());
+            if (this._room._running){
+                this._sendToModerator(this._statisticHandler.toMessage());
+            }
         }, UPDATE_SPEECH_STATISTIC_INTERVAL);
     }
 }

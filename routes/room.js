@@ -177,7 +177,6 @@ router.get('/rejoin', async function(req, res, next) {
     }
 
     const room = await RoomDao.isInActiveRoom(req.headers.guest_uuid);
-    console.log(room);
 
     if (room) {
         res.json(room.toJson(req.headers.guest_uuid));
@@ -209,7 +208,7 @@ router.get('/statistic', async function(req, res, next) {
         return;
     }
 
-    if (room._owner !== req.headers.guest_uuid || !RoomDao.isGuestParticipantOfRoom(req.headers.guest_uuid, roomId)){
+    if (room._owner !== req.headers.guest_uuid && !RoomDao.isGuestParticipantOfRoom(req.headers.guest_uuid, roomId)){
         res.status(400);
         res.send( "Kein Zugriff auf Raum." );
         return;
@@ -219,12 +218,10 @@ router.get('/statistic', async function(req, res, next) {
 
     let filename = `room_${roomId}`;
 
-    res.writeHead(200, {
-        'Content-Type': 'text/csv',
-        'Content-Disposition': `attachment; filename=${filename}.csv`
-    });
+    res.set('Content-Type', 'text/csv');
+    res.set('Content-disposition', `attachment; filename=${filename}.csv`);
 
-    res.end(csv,"binary");
+    res.status(200).send(csv);
 
 });
 

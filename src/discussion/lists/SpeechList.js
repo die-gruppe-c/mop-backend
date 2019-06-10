@@ -11,7 +11,7 @@ class SpeechList {
     }
 
     add(id, type){
-        if (isNaN(id)) return;
+        if (isNaN(id) || id < 0) return;
 
         let filteredList = this._list.filter(function (item) {
             return item.id === id;

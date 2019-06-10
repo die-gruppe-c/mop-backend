@@ -12,7 +12,7 @@ class SpeechContributionHandler {
     }
 
     setSpeaker(id, speechType){
-        if (isNaN(id)) return;
+        if (isNaN(id) || id < 0) return;
 
         this._currentlySpeaking = id;
         this._speechType = speechType;
@@ -32,7 +32,6 @@ class SpeechContributionHandler {
     stop(){
         this._currentlySpeaking = undefined;
         this._speechType = undefined;
-
         this._stopwatch.reset();
     }
 
@@ -41,7 +40,7 @@ class SpeechContributionHandler {
     }
 
     getDuration(){
-        this._stopwatch.getDuration();
+        return this._stopwatch.getDuration();
     }
 
     toMessage(){

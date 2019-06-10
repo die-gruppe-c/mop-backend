@@ -116,7 +116,10 @@ class RoomDao{
 
             if (!cur_room || cur_room._id !== row.id){
                 if (cur_room){
-                    if (cur_attribute) cur_room._attributes.push(cur_attribute);
+                    if (cur_attribute) {
+                        cur_room._attributes.push(cur_attribute);
+                        cur_attribute = undefined;
+                    }
                     rooms.push(cur_room);
                 }
                 cur_room = new Room(row.id, row.name, row.owner, row.created_on, row.archived, row.running);
@@ -273,7 +276,10 @@ class RoomDao{
 
             if (!cur_participant || cur_participant._uuid !== row.guest_id){
                 if (cur_participant){
-                    if (cur_attribute) cur_participant._attributes.push(cur_attribute);
+                    if (cur_attribute) {
+                        cur_participant._attributes.push(cur_attribute);
+                        cur_attribute = undefined;
+                    }
                     participants.push(cur_participant);
                 }
                 cur_participant = new Guest(row.room_id, row.guest_id, row.guest_name, row.created_by_owner);

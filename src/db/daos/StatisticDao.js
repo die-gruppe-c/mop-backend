@@ -1,5 +1,6 @@
 var DbClient = require('../DbClient');
 var RoomDao = require('./RoomDao');
+const { Parser } = require('json2csv');
 
 class StatisticDao{
 
@@ -31,38 +32,44 @@ class StatisticDao{
 
             let {rows} = await client.query(`SELECT * FROM speech_statistic WHERE room_id = '${roomId}'`);
 
-            let csv = [];
-            let header = ["Name","Rededauer"];
-
-            let offset = header.length;
-
-            let attributeIdxDict = {};
+            let header = [{
+                label: 'Name',
+                value: 'name'
+            },{
+                label: 'Rededauer in ms',
+                value: 'duration'
+            }];
 
             for (let i in room._attributes){
-                attributeIdxDict[room._attributes[i]._name] = offset + i;
-                header.push(room._attributes[i]._name);
+                let line = {};
+                line["label"] = room._attributes[i]._name;
+                line["value"] = room._attributes[i]._name;
+                header.push(line);
             }
 
-            csv.push(header);
+
+            let values = [];
+
 
             for (let i in rows){
                 let row = rows[i];
-                let line = [];
+                let line = {};
 
                 let guest = guest_dict[row.guest_id];
 
-                line.push(guest._name);
-                line.push(row.duration);
+                line["name"] = guest._name;
+                line["duration"] = row.duration;
 
                 for (let a in guest._attributes){
-                    let idx = attributeIdxDict[guest._attributes._name];
-                    line[idx] = guest._attributes._values[0];
+                    line[guest._attributes[a]._name] = guest._attributes[a]._values[0]._name;
                 }
 
-                csv.push(line);
+                values.push(line);
             }
 
-            return csv;
+            const json2csvParser = new Parser({ fields: header, quote: '' });
+
+            return  json2csvParser.parse(values);
 
         } catch (e) {
             console.log(e);

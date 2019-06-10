@@ -67,7 +67,7 @@ class DiscussionManager{
     }
 
     _onRoomArchived(discussionRoom){
-        for( var i = 0; i < this._discussionRooms.length; i++){
+        for( let i in this._discussionRooms){
             if ( this._discussionRooms[i] === discussionRoom) {
                 this._discussionRooms.splice(i, 1);
             }
