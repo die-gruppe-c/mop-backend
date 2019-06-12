@@ -10,7 +10,7 @@ class StatisticHandler {
         this._attributeStatistics = {};
 
         for (let i in room._attributes){
-            this._attributeStatistics[room._attributes[i]._name] = new StatisticRecord();
+            this._attributeStatistics[room._attributes[i]._name] = new StatisticRecord(room._attributes[i]._values);
         }
     }
 
@@ -20,17 +20,28 @@ class StatisticHandler {
         for (let i in guest._attributes){
             if (this._attributeStatistics[guest._attributes[i]._name] !== null){
                 this._attributeStatistics[guest._attributes[i]._name]
-                    .addTimeForValue(guest._attributes[i]._values[0],duration);
+                    .addTimeForValue(guest._attributes[i]._values[0]._name,duration);
             }
         }
 
     }
 
-    toMessage(){
+    toMessage(current_speaker, current_duration){
         let json = {};
 
         for (let i in this._attributeStatistics){
-            json[i] = this._attributeStatistics[i].toJson();
+
+            let current_speaker_value = false;
+            
+            if (current_speaker){
+                current_speaker_value = current_speaker.getValueForAttribute(i);
+            }
+            
+            if (!current_speaker_value) {
+                json[i] = this._attributeStatistics[i].toJson();
+            }else{
+                json[i] = this._attributeStatistics[i].toJson(current_speaker_value._name, current_duration);
+            }
         }
 
         return Util.wrapResponse(MESSAGE_KEY, json);

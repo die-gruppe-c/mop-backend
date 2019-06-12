@@ -15,18 +15,24 @@ class StatisticRecord {
     _getTotalDuration(){
         let total = 0;
         for (let i in this._values){
-            total += this._values[i];
+            total += +this._values[i];
         }
         return total;
     }
 
-    toJson(){
+    toJson(currentSpeakerValue, currentDuration){
         let json = {};
 
         let total = this._getTotalDuration();
 
+        if (currentSpeakerValue){
+            total += +currentDuration;
+        }
+
         for (let i in this._values){
-            json[i] = total === 0 ? 0 : Math.floor((this._values[i] / total) * 100);
+            let valueDuration = this._values[i];
+            if (currentSpeakerValue && currentSpeakerValue === i) valueDuration += +currentDuration;
+            json[i] = total === 0 ? 0 : Math.floor((valueDuration / total) * 100);
         }
 
         return {

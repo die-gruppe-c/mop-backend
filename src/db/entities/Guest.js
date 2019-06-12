@@ -44,6 +44,16 @@ class Guest {
         return json;
     }
 
+    getValueForAttribute(attributeName){
+        let filteredAttributes = this._attributes.filter(function (item) {
+            return attributeName === item._name;
+        });
+
+        if (filteredAttributes.length === 0) return false;
+
+        return filteredAttributes[0]._values[0];
+    }
+
 }
 
 module.exports = Guest;

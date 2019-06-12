@@ -411,7 +411,8 @@ class DiscussionRoom{
     _updateSpeechStatistics() {
         setInterval(() => {
             if (this._room._running){
-                this._sendToModerator(this._statisticHandler.toMessage());
+                this._sendToModerator(this._statisticHandler.toMessage(
+                    this._getParticipantFromFrontendId(this._speechHandler.getSpeaker()), this._speechHandler.getDuration()));
             }
         }, UPDATE_SPEECH_STATISTIC_INTERVAL);
     }
