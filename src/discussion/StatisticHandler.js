@@ -24,6 +24,26 @@ class StatisticHandler {
             }
         }
 
+        this._notifyChangeListener();
+
+    }
+
+    setOnStatisticChangeListener(statisticChangeListener){
+        this._statisticChangeListener = statisticChangeListener;
+    }
+
+    _notifyChangeListener(){
+
+        if (!this._statisticChangeListener) return;
+
+        let statistic = {};
+
+        for (let i in this._attributeStatistics){
+            statistic[i] = this._attributeStatistics[i].getAllPercentages();
+        }
+
+        this._statisticChangeListener(statistic);
+
     }
 
     toMessage(current_speaker, current_duration){

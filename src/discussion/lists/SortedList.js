@@ -7,13 +7,17 @@ class SortedList {
 
     constructor(){
         this._list = [];
+        this._participants = [];
+        this.onStatisticChange = this.onStatisticChange.bind(this);
     }
 
-    updateList(participants){
+    setParticipants(participants){
+        this._participants = participants;
+        this.sortAlphabetically();
+    }
 
-        this._list = [];
-
-        participants.sort(function (a,b) {
+    sortAlphabetically(){
+        this._participants.sort(function (a,b) {
             a = a._name.toUpperCase();
             b = b._name.toUpperCase();
             if (a < b) {
@@ -25,11 +29,46 @@ class SortedList {
             return 0;
         });
 
-        for (let i in participants) {
-            if (!participants.hasOwnProperty(i)) continue;
-            this._list.push(participants[i]._frontendId);
-        }
+        this._updateListFromParticipants()
+    }
 
+    _updateListFromParticipants(){
+        this._list = [];
+
+        for (let i in this._participants) {
+            if (!this._participants.hasOwnProperty(i)) continue;
+            this._list.push(this._participants[i]._frontendId);
+        }
+    }
+
+
+    onStatisticChange(statistic){
+        //statistic = { attr1: { wert1: 20, wert2: 80 } }
+
+
+        this._participants.sort( function (a, b) {
+            let aScore = 0;
+
+            for (let i in a._attributes){
+                aScore += +statistic[a._attributes[i]._name][a._attributes[i]._values[0]._name];
+            }
+
+            let bScore = 0;
+
+            for (let i in b._attributes){
+                bScore += +statistic[b._attributes[i]._name][b._attributes[i]._values[0]._name];
+            }
+
+            if (aScore < bScore) {
+                return -1;
+            }
+            if (aScore > bScore) {
+                return 1;
+            }
+            return 0;
+        });
+
+        this._updateListFromParticipants();
     }
 
 

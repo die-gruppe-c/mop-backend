@@ -35,7 +35,7 @@ const ARCHIVED = 'archived';
 
 
 const CHECK_CONNECTION_INTERVAL = 20000;
-const UPDATE_SPEECH_STATISTIC_INTERVAL = 5000;
+const UPDATE_SPEECH_STATISTIC_INTERVAL = 1000;
 
 class DiscussionRoom{
 
@@ -51,6 +51,7 @@ class DiscussionRoom{
 
         this._speechHandler = new SpeechContributionHandler();
         this._statisticHandler = new StatisticHandler(room);
+        this._statisticHandler.setOnStatisticChangeListener(this._sortedUserList.onStatisticChange);
 
         this._stopWatch = new Stopwatch();
 
@@ -197,6 +198,7 @@ class DiscussionRoom{
                 let nextSpeaker = this._speechList.removeFirst();
                 if (nextSpeaker) this._speechHandler.setSpeaker(nextSpeaker.id, nextSpeaker.speechType);
                 this._broadcastAll(this._speechList.toMessage());
+                this._sendToModerator(this._sortedUserList.toMessage());
                 break;
         }
         this._broadcastAll(this._speechHandler.toMessage());
@@ -225,7 +227,7 @@ class DiscussionRoom{
                 this._allParticipants[i]._frontendId = i;
             }
 
-            this._sortedUserList.updateList(this._allParticipants);
+            this._sortedUserList.setParticipants(this._allParticipants);
 
             await this._broadcastUserData();
             this._sendToModerator(this._sortedUserList.toMessage());
