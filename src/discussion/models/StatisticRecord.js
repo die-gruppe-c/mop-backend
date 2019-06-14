@@ -20,15 +20,15 @@ class StatisticRecord {
         return total;
     }
 
-    _getValuePercentage(value, currentDuration){
+    _getValuePercentage(value,currentSpeakerValue, currentDuration){
         let total = this._getTotalDuration();
         let valueDuration = this._values[value];
 
         //TODO add value weights to calculation
 
-        if (currentDuration){
+        if (currentSpeakerValue && currentDuration){
             total += +currentDuration;
-            valueDuration += currentDuration;
+            if (currentSpeakerValue === value) valueDuration += currentDuration;
         }
         return total === 0 ? 0 : Math.floor((valueDuration / total) * 100);
     }
@@ -48,8 +48,7 @@ class StatisticRecord {
 
         for (let i in this._values){
 
-            json[i] = this._getValuePercentage(i,
-                currentSpeakerValue && currentSpeakerValue === i ? currentDuration : undefined);
+            json[i] = this._getValuePercentage(i,currentSpeakerValue, currentDuration);
 
         }
 
