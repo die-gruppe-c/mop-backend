@@ -15,6 +15,8 @@ class StatisticHandler {
     }
 
     addRecord(guest, duration){
+        if (duration === 0) return;
+
         StatisticDao.insertRecord(guest._roomId, guest._uuid, duration);
 
         for (let i in guest._attributes){
