@@ -51,7 +51,7 @@ class Guest {
 
         if (filteredAttributes.length === 0) return false;
 
-        return filteredAttributes[0]._values[0];
+        return filteredAttributes[0]._valueDurations[0];
     }
 
 }

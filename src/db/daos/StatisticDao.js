@@ -61,7 +61,7 @@ class StatisticDao{
                 line["duration"] = row.duration;
 
                 for (let a in guest._attributes){
-                    line[guest._attributes[a]._name] = guest._attributes[a]._values[0]._name;
+                    line[guest._attributes[a]._name] = guest._attributes[a]._valueDurations[0]._name;
                 }
 
                 values.push(line);

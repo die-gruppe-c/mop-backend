@@ -259,7 +259,7 @@ class DiscussionRoom{
             wantToSpeakItem = new SpeechRequest(reqId,SpeechTypes.SPEECH_CONTRIBUTION);
         }
 
-        this._broadcastAll(this._wantToSpeakList.toMessage());
+        this._sendToModerator(this._wantToSpeakList.toMessage());
 
         if (!this._speechHandler.getSpeaker() && this._speechList.getLength() === 0) {
             this._speechHandler.setSpeaker(wantToSpeakItem.id, wantToSpeakItem.speechType);

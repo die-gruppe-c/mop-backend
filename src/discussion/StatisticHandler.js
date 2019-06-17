@@ -10,7 +10,7 @@ class StatisticHandler {
         this._attributeStatistics = {};
 
         for (let i in room._attributes){
-            this._attributeStatistics[room._attributes[i]._name] = new StatisticRecord(room._attributes[i]._values);
+            this._attributeStatistics[room._attributes[i]._name] = new StatisticRecord(room._attributes[i]._valueDurations);
         }
     }
 
@@ -22,7 +22,7 @@ class StatisticHandler {
         for (let i in guest._attributes){
             if (this._attributeStatistics[guest._attributes[i]._name] !== null){
                 this._attributeStatistics[guest._attributes[i]._name]
-                    .addTimeForValue(guest._attributes[i]._values[0]._name,duration);
+                    .addTimeForValue(guest._attributes[i]._valueDurations[0]._name,duration);
             }
         }
 

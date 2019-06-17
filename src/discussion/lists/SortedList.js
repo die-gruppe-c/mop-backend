@@ -50,13 +50,13 @@ class SortedList {
             let aScore = 0;
 
             for (let i in a._attributes){
-                aScore += +statistic[a._attributes[i]._name][a._attributes[i]._values[0]._name];
+                aScore += +statistic[a._attributes[i]._name][a._attributes[i]._valueDurations[0]._name];
             }
 
             let bScore = 0;
 
             for (let i in b._attributes){
-                bScore += +statistic[b._attributes[i]._name][b._attributes[i]._values[0]._name];
+                bScore += +statistic[b._attributes[i]._name][b._attributes[i]._valueDurations[0]._name];
             }
 
             if (aScore < bScore) {
