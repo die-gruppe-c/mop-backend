@@ -19,8 +19,8 @@ describe('parse Participants', function () {
         expect(guests[0]._attributes.length).to.be.equal(1);
         expect(guests[1]._attributes.length).to.be.equal(1);
 
-        expect(guests[0]._attributes[0]._valueDurations.length).to.be.equal(1);
-        expect(guests[1]._attributes[0]._valueDurations.length).to.be.equal(1);
+        expect(guests[0]._attributes[0]._values.length).to.be.equal(1);
+        expect(guests[1]._attributes[0]._values.length).to.be.equal(1);
 
     });
 
@@ -43,10 +43,10 @@ describe('parse Participants', function () {
         expect(guests[0]._attributes.length).to.be.equal(2);
         expect(guests[1]._attributes.length).to.be.equal(2);
 
-        expect(guests[0]._attributes[0]._valueDurations.length).to.be.equal(1);
-        expect(guests[0]._attributes[1]._valueDurations.length).to.be.equal(1);
-        expect(guests[1]._attributes[0]._valueDurations.length).to.be.equal(1);
-        expect(guests[1]._attributes[1]._valueDurations.length).to.be.equal(1);
+        expect(guests[0]._attributes[0]._values.length).to.be.equal(1);
+        expect(guests[0]._attributes[1]._values.length).to.be.equal(1);
+        expect(guests[1]._attributes[0]._values.length).to.be.equal(1);
+        expect(guests[1]._attributes[1]._values.length).to.be.equal(1);
 
     });
 });

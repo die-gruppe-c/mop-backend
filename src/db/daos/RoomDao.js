@@ -18,8 +18,8 @@ class RoomDao{
                 let newAttr = room._attributes[i];
                 await client.query(`INSERT INTO room_attribute (name, room_id) VALUES ('${newAttr._name}','${room._id}')`);
 
-                for (let a = 0; a < newAttr._valueDurations.length; a++) {
-                    let value = newAttr._valueDurations[a];
+                for (let a = 0; a < newAttr._values.length; a++) {
+                    let value = newAttr._values[a];
                     await client.query( `INSERT INTO room_attribute_value (name, attribute_name, room_id, color, weight) VALUES ('${value._name}','${newAttr._name}','${room._id}','${value._color}','${value._weight}')`);
                 }
             }
@@ -129,7 +129,7 @@ class RoomDao{
                 if (cur_attribute) cur_room._attributes.push(cur_attribute);
                 cur_attribute = new Attribute(row.attribute_name);
             }
-            cur_attribute._valueDurations.push(new AttributeValue(row.value_name, row.color, row.weight));
+            cur_attribute._values.push(new AttributeValue(row.value_name, row.color, row.weight));
         }
         cur_room._attributes.push(cur_attribute);
         rooms.push(cur_room);
@@ -171,7 +171,7 @@ class RoomDao{
             await client.query(`INSERT INTO room_participant (room_id, guest_id, guest_name, created_by_owner) VALUES ('${guest._roomId}','${guest._uuid}', '${guest._name}', '${guest._createdByOwner}')`);
 
             for(let i = 0; i < guest._attributes.length; i++){
-                let value = guest._attributes[i]._valueDurations[0]._name;
+                let value = guest._attributes[i]._values[0]._name;
                 await client.query(`INSERT INTO room_participant_attribute (room_id ,guest_id ,attribute, attribute_value) VALUES ('${guest._roomId}','${guest._uuid}', '${guest._attributes[i]._name}', '${value}')`);
             }
 
@@ -289,7 +289,7 @@ class RoomDao{
                 if (cur_attribute) cur_participant._attributes.push(cur_attribute);
                 cur_attribute = new Attribute(row.attribute);
             }
-            cur_attribute._valueDurations.push(new AttributeValue(row.attribute_value, row.color, row.weight));
+            cur_attribute._values.push(new AttributeValue(row.attribute_value, row.color, row.weight));
         }
         cur_participant._attributes.push(cur_attribute);
         participants.push(cur_participant);

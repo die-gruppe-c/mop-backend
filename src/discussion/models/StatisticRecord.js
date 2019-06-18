@@ -1,37 +1,32 @@
 class StatisticRecord {
 
     constructor(attr_values){
-        this._valueDurations = {};
-        this._valueWeights = {};
-        this._hasWeights = false;
+        this._values = {};
 
         for (let i in attr_values){
-            this._valueDurations[attr_values[i]._name] = 0;
-            this._valueWeights[attr_values[i]._name] = attr_values[i]._weight;
-            if (attr_values[i]._weight !== 0) this._hasWeights = true;
+            this._values[attr_values[i]._name] = 0;
         }
     }
 
     addTimeForValue(value, duration){
-        this._valueDurations[value] += +(this._hasWeights ? duration * this._valueWeights[value] : duration);
+        this._values[value] += duration;
     }
 
     _getTotalDuration(){
         let total = 0;
-        for (let i in this._valueDurations){
-            total += +this._valueDurations[i];
+        for (let i in this._values){
+            total += +this._values[i];
         }
         return total;
     }
 
     _getValuePercentage(value,currentSpeakerValue, currentDuration){
         let total = this._getTotalDuration();
-        let valueDuration = this._valueDurations[value];
+        let valueDuration = this._values[value];
 
         //TODO add value weights to calculation
 
         if (currentSpeakerValue && currentDuration){
-            currentDuration = this._hasWeights ? currentDuration * this._valueWeights[value] : currentDuration;
             total += +currentDuration;
             if (currentSpeakerValue === value) valueDuration += currentDuration;
         }
@@ -41,7 +36,7 @@ class StatisticRecord {
     getAllPercentages(){
         let allPercentages = {};
 
-        for (let i in this._valueDurations){
+        for (let i in this._values){
             allPercentages[i] = this._getValuePercentage(i);
         }
 
@@ -51,7 +46,7 @@ class StatisticRecord {
     toJson(currentSpeakerValue, currentDuration){
         let json = {};
 
-        for (let i in this._valueDurations){
+        for (let i in this._values){
 
             json[i] = this._getValuePercentage(i,currentSpeakerValue, currentDuration);
 
