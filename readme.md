@@ -366,7 +366,6 @@ Gesamtzeit in Millisekunden. Werte prozentual zur Gesamtzeit.
   "command": "speechStatistics",
   "data": {
               "Geschlecht": {
-                "total": 34534545,
                 "values": {
                     "männlich": 60,
                     "weiblich": 40
