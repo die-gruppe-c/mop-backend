@@ -10,7 +10,7 @@ class WantToSpeakList {
     }
 
     add(id, type){
-        if (isNaN(type)) return;
+        if (isNaN(type)) return false;
 
         let filteredWantToSpeakList = this._list.filter(function (speechContribution) {
             return id === speechContribution.id;
@@ -19,10 +19,12 @@ class WantToSpeakList {
         if (filteredWantToSpeakList.length === 0){
             this._list.push(new SpeechRequest(id,type));
         }
+
+        return true;
     }
 
     remove(id){
-        if (isNaN(id)) return;
+        if (isNaN(id)) return false;
 
         for(let i = 0; i < this._list.length; i++) {
             let speechContribution = this._list[i];
@@ -32,6 +34,8 @@ class WantToSpeakList {
                 i--;
             }
         }
+
+        return true;
     }
 
     contains(id){

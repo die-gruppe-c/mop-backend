@@ -32,6 +32,8 @@ const ALL_USERS = 'allUsers';
 const SPEECH_TYPES = 'speechTypes';
 const ROOM = 'room';
 const ARCHIVED = 'archived';
+const WTS_ADDED = 'wts_added';
+const WTS_REMOVED = 'wts_removed';
 
 
 const CHECK_CONNECTION_INTERVAL = 20000;
@@ -161,11 +163,13 @@ class DiscussionRoom{
 
             switch (true) {
                 case wantToSpeakRegex.test(request):
-                    this._wantToSpeakList.add(id, Util.parseMessage(wantToSpeakRegex,request));
+                    let success = this._wantToSpeakList.add(id, Util.parseMessage(wantToSpeakRegex,request));
+                    if (success) this._sendToClient(participant, Util.wrapResponse(WTS_ADDED));
                     this._sendToModerator(this._wantToSpeakList.toMessage());
                     break;
                 case wantNotToSpeakRegex.test(request):
-                    this._wantToSpeakList.remove(id);
+                    let success_removed = this._wantToSpeakList.remove(id);
+                    if (success_removed) this._sendToClient(participant, Util.wrapResponse(WTS_REMOVED));
                     this._sendToModerator(this._wantToSpeakList.toMessage());
                     break;
                 default:
