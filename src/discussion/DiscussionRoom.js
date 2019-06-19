@@ -258,6 +258,8 @@ class DiscussionRoom{
         let wantToSpeakItem = this._wantToSpeakList.contains(reqId);
         if (wantToSpeakItem){
             this._wantToSpeakList.remove(reqId);
+            let client = this._getClientFromFrontendId(reqId);
+            if (client) this._sendToClient(client, Util.wrapResponse(WTS_REMOVED));
         }else{
             if (isNaN(reqId)) return;
             wantToSpeakItem = new SpeechRequest(reqId,SpeechTypes.SPEECH_CONTRIBUTION);
@@ -297,6 +299,20 @@ class DiscussionRoom{
         if (filteredParticipants.length === 0) return false;
 
         return filteredParticipants[0];
+    }
+
+    _getClientFromFrontendId(id){
+        let participant = this._getParticipantFromFrontendId(id);
+
+        if (!participant) return false;
+
+        let filteredClients = this._clients.filter(function (item) {
+           return participant._uuid === item.guest_data._uuid;
+        });
+
+        if (filteredClients.length === 0) return false;
+
+        return filteredClients[0];
     }
 
     static _speechTypesToMessage(){
