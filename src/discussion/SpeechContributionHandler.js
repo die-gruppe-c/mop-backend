@@ -43,6 +43,10 @@ class SpeechContributionHandler {
         return this._stopwatch.getDuration();
     }
 
+    getSpeachType(){
+        return this._speechType;
+    }
+
     toMessage(){
         return Util.wrapResponse(MESSAGE_KEY, {
             speaker: this.getSpeaker(),

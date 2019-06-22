@@ -1,7 +1,6 @@
 const RoomDao = require('../db/daos/RoomDao');
 const Util = require('./util/Util');
 const Stopwatch = require('./util/Stopwatch');
-const SpeechTypes = require('./SpeechType');
 const SpeechRequest = require('./models/SpeechRequest');
 const WantToSpeakList = require('./lists/WantToSpeakList');
 const SpeechList = require('./lists/SpeechList');
@@ -29,7 +28,6 @@ const stopSpeechContribution = /^stopSpeech/;
 //answers
 const STARTED = 'started';
 const ALL_USERS = 'allUsers';
-const SPEECH_TYPES = 'speechTypes';
 const ROOM = 'room';
 const ARCHIVED = 'archived';
 const WTS_ADDED = 'wts_added';
@@ -86,7 +84,6 @@ class DiscussionRoom{
 
 
         this._monitorConnection(moderator);
-        this._sendToModerator(DiscussionRoom._speechTypesToMessage());
         this._sendToModerator(Util.wrapResponse(ROOM, this._room.toJson(this._room._owner)));
     }
 
@@ -111,7 +108,6 @@ class DiscussionRoom{
         });
 
         this._monitorConnection(participant);
-        this._sendToClient(participant,DiscussionRoom._speechTypesToMessage());
         this._sendToClient(participant, Util.wrapResponse(ROOM, this._room.toJson(participant.guest_data._uuid)));
 
         (async () => {
@@ -197,7 +193,7 @@ class DiscussionRoom{
                 this._speechHandler.pause();
                 let guest = this._getParticipantFromFrontendId(this._speechHandler.getSpeaker());
                 if (!guest) return;
-                this._statisticHandler.addRecord(guest, this._speechHandler.getDuration());
+                this._statisticHandler.addRecord(guest, this._speechHandler.getDuration(), this._speechHandler.getSpeachType());
                 this._speechHandler.stop();
                 let nextSpeaker = this._speechList.removeFirst();
                 if (nextSpeaker) this._speechHandler.setSpeaker(nextSpeaker.id, nextSpeaker.speechType);
@@ -252,20 +248,29 @@ class DiscussionRoom{
 
     async _addUserWhoWantsToSpeechList(request){
         //remove from want to speak list and add to speech list
-        let reqId = Util.parseMessage(addUserToSpeechListRegex,request);
+        let message = Util.parseMessage(addUserToSpeechListRegex,request).split(" ");
+        let id = message[0];
 
+        let wantToSpeakItem;
 
-        let wantToSpeakItem = this._wantToSpeakList.contains(reqId);
-        if (wantToSpeakItem){
-            this._wantToSpeakList.remove(reqId);
-            let client = this._getClientFromFrontendId(reqId);
-            if (client) this._sendToClient(client, Util.wrapResponse(WTS_REMOVED));
-        }else{
-            if (isNaN(reqId)) return;
-            wantToSpeakItem = new SpeechRequest(reqId,SpeechTypes.SPEECH_CONTRIBUTION);
+        switch (message.length) {
+            case 1:
+                //get and remove item from want to speak list
+                wantToSpeakItem = this._wantToSpeakList.contains(id);
+                if (wantToSpeakItem) {
+                    this._wantToSpeakList.remove(id);
+                    let client = this._getClientFromFrontendId(id);
+                    if (client) this._sendToClient(client, Util.wrapResponse(WTS_REMOVED));
+                    this._sendToModerator(this._wantToSpeakList.toMessage());
+                }else return;
+                break;
+            case 2:
+                //create want to speak item from message
+                wantToSpeakItem = new SpeechRequest(id,message[1]);
+                break;
+            default:
+                return;
         }
-
-        this._sendToModerator(this._wantToSpeakList.toMessage());
 
         if (!this._speechHandler.getSpeaker() && this._speechList.getLength() === 0) {
             this._speechHandler.setSpeaker(wantToSpeakItem.id, wantToSpeakItem.speechType);
@@ -313,10 +318,6 @@ class DiscussionRoom{
         if (filteredClients.length === 0) return false;
 
         return filteredClients[0];
-    }
-
-    static _speechTypesToMessage(){
-        return Util.wrapResponse(SPEECH_TYPES, SpeechTypes);
     }
 
     async _broadcastUserData(){

@@ -188,8 +188,15 @@ Nur Moderator.
  
 Aktualisiert die Daten der Gäste. Antwort: allUsers
 
-#### addUserToSpeechList: `ID`
-Nur Moderator und wenn Raum bereits läuft.
+#### addUserToSpeechList: `ID` `BEITRAGSTYP` 
+Nur Moderator und wenn Raum bereits läuft. 
+
+Wenn nur ID mitgeschickt wird, wird der Teilnehmer aus der Meldeliste entfernt
+und auf die Redeliste gesetzt. 
+
+Wenn zusätzlich ein Beitragstyp angegeben wird kann der Teilnehmer der 
+Redeliste hinzugefügt werden ohne dass er sich vorher gemeldet hat. Also
+z.B. von Sortierter Liste auf Redeliste.
 
 Fügt einen Client der sich gemeldet hat der Redeliste hinzu.
 
@@ -229,8 +236,8 @@ Antworten werden in einem Wrapper verschickt:
 
 ```
 {
-    "command": "stared",
-    "data": 
+    "command": "",
+    "data": ""
 }
 ```
 
@@ -240,19 +247,6 @@ Benachrichtigt alle dass der Raum vom Moderator gestarted wurde.
 
 #### archived
 Benachrichtigt alle dass der Raum archiviert wurde.
-
-#### speechTypes
-Redebeitrag-Typen. Bei senden an den Server immer die Id und nicht den
-Namen verwenden!
-```
-{
-  "command": "speechTypes",
-  "data": {
-    "SPEECH_CONTRIBUTION": 1,
-    "QUESTION": 2
-  }
-}
-```
 
 #### allUsers
 Daten der Gäste. Frontend_id Attribut nur vorhanden nachdem der Raum
@@ -305,11 +299,11 @@ Redeliste
   "data": [
     {
       "id": "1",
-      "speechType": 2
+      "speechType": "Frage"
     },
     {
       "id": "0",
-      "speechType": 2
+      "speechType": "Statement"
     }
   ]
 }
@@ -323,11 +317,11 @@ Meldeliste
   "data": [
     {
       "id": "1",
-      "speechType": 2
+      "speechType": "Frage"
     },
     {
       "id": "0",
-      "speechType": 2
+      "speechType": "Frage"
     }
   ]
 }
@@ -349,7 +343,7 @@ Aktueller Redner
   "command": "currentlySpeaking",
   "data": {
               "speaker": 2,
-              "speechType": 1,
+              "speechType": "Frage",
               "running": true,
               "duration": 34342
           }
