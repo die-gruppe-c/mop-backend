@@ -10,7 +10,6 @@ class WantToSpeakList {
     }
 
     add(id, type){
-        if (isNaN(type)) return false;
 
         let filteredWantToSpeakList = this._list.filter(function (speechContribution) {
             return id === speechContribution.id;
