@@ -48,6 +48,7 @@ CREATE TABLE speech_statistic(
     room_id INT REFERENCES room (id) ON DELETE CASCADE,
     guest_id VARCHAR (36),
     duration INT,
+    speech_type VARCHAR(50),
     FOREIGN KEY (room_id, guest_id) REFERENCES room_participant (room_id, guest_id) ON DELETE CASCADE
 );
 

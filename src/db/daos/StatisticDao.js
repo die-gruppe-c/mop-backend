@@ -4,10 +4,10 @@ const { Parser } = require('json2csv');
 
 class StatisticDao{
 
-    static async insertRecord(roomId, guestId, duration){
+    static async insertRecord(roomId, guestId, duration, speechType){
         let client = await DbClient.getClient();
         try {
-            await client.query(`INSERT INTO speech_statistic (room_id, guest_id, duration) VALUES ('${roomId}','${guestId}', '${duration}')`);
+            await client.query(`INSERT INTO speech_statistic (room_id, guest_id, duration, speech_type) VALUES ('${roomId}','${guestId}', '${duration}', '${speechType}')`);
         } catch (e) {
             console.log(e);
             return false;
@@ -38,6 +38,9 @@ class StatisticDao{
             },{
                 label: 'Rededauer in ms',
                 value: 'duration'
+            },{
+                label: 'Beitragstyp',
+                value: 'type'
             }];
 
             for (let i in room._attributes){
@@ -59,6 +62,7 @@ class StatisticDao{
 
                 line["name"] = guest._name;
                 line["duration"] = row.duration;
+                line["type"] = row.speech_type;
 
                 for (let a in guest._attributes){
                     line[guest._attributes[a]._name] = guest._attributes[a]._values[0]._name;

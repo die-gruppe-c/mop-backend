@@ -14,10 +14,10 @@ class StatisticHandler {
         }
     }
 
-    addRecord(guest, duration){
+    addRecord(guest, duration, speechType){
         if (duration === 0) return;
 
-        StatisticDao.insertRecord(guest._roomId, guest._uuid, duration);
+        StatisticDao.insertRecord(guest._roomId, guest._uuid, duration, speechType);
 
         for (let i in guest._attributes){
             if (this._attributeStatistics[guest._attributes[i]._name] !== null){
