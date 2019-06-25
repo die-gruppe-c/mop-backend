@@ -1,12 +1,15 @@
 # MOP Backend
 
-## Run locally
-1. Clone Repository
-2. Install dependencies `npm install`
-3. Run `DEBUG=mop-backend:* npm start`
+## Deployment
+1. PostgreSQL Datenbank aufsetzen
+2. Datenbankschema übernehmen (db_schema.sql)
+3. NodeJS Server aufsetzten
+4. Die Datenbank URL muss in der Umgebungsvariable "process.env.DATABASE_URL" gespeichert werden. Dies sollte in app.js geschehen
+5. App auf NodeJS Server installieren
 
 ## Deploy on Heroku
-Push to master. Gets deployed automatically.
+1. Deploy repository on heroku (https://devcenter.heroku.com/articles/getting-started-with-nodejs)
+2. Add Heroku Postgres Add-In (https://www.heroku.com/postgres)
 
 ## URL
 `https://mop-gruppec-backend.herokuapp.com/`
